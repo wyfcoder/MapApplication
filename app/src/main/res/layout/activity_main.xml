@@ -59,45 +59,42 @@
             android:layout_height="wrap_content" />
     </RelativeLayout>
 
-    <android.support.v4.widget.NestedScrollView
+    <RelativeLayout
+        android:layout_gravity="left"
         android:background="@color/qmui_config_color_white"
+        android:id="@+id/main_rl_drawer_view"
         android:layout_width="240dp"
         android:layout_height="match_parent">
-
-        <RelativeLayout
-            android:background="@color/qmui_config_color_white"
-            android:id="@+id/main_rl_drawer_view"
+        <LinearLayout
+            android:id="@+id/main_rl_ll_btn_container"
+            android:layout_alignParentBottom="true"
             android:layout_width="240dp"
-            android:layout_height="match_parent">
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/main_rv_show_data"
-                android:layout_width="240dp"
-                android:layout_height="wrap_content">
-            </android.support.v7.widget.RecyclerView>
-            <LinearLayout
-                android:id="@+id/main_rl_ll_btn_container"
-                android:layout_alignParentBottom="true"
-                android:layout_width="240dp"
-                android:layout_height="wrap_content">
-                <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
-                    android:text="绘图"
-                    android:paddingTop="3dp"
-                    android:paddingBottom="3dp"
-                    android:textSize="16sp"
-                    android:layout_weight="1"
-                    android:layout_margin="10dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-                <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
-                    android:text="清除"
-                    android:paddingTop="3dp"
-                    android:paddingBottom="3dp"
-                    android:textSize="16sp"
-                    android:layout_margin="10dp"
-                    android:layout_weight="1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-        </RelativeLayout>
-    </android.support.v4.widget.NestedScrollView>
+            android:layout_height="wrap_content">
+            <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
+                android:text="绘图"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:textSize="16sp"
+                android:layout_weight="1"
+                android:layout_margin="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
+                android:text="清除"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:textSize="16sp"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/main_rv_show_data"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/main_rl_ll_btn_container">
+        </android.support.v7.widget.RecyclerView>
+    </RelativeLayout>
 </android.support.v4.widget.DrawerLayout>
