@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp">
+    <TextView
+        android:textColor="@color/qmui_btn_blue_text"
+        android:id="@+id/main_rv_item_tv_latitude_describe"
+        android:text="经度:"
+        android:textSize="16sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/main_rv_item_tv_latitude_describe"
+        android:textColor="@color/qmui_config_color_black"
+        android:textSize="16sp"
+        android:id="@+id/main_rv_item_ivi_latitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="34.667"/>
+
+
+    <TextView
+        android:textColor="@color/qmui_btn_blue_text"
+        android:textSize="16sp"
+        android:id="@+id/main_rv_item_tv_longitude_describe"
+        android:layout_below="@id/main_rv_item_ivi_latitude"
+        android:layout_marginTop="10dp"
+        android:text="纬度:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/main_rv_item_tv_longitude_describe"
+        android:textColor="@color/qmui_config_color_black"
+        android:textSize="16sp"
+        android:layout_below="@id/main_rv_item_ivi_latitude"
+        android:layout_marginTop="10dp"
+        android:id="@+id/main_rv_item_ivi_longitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="108.88" />
+    <TextView
+        android:textColor="@color/qmui_btn_blue_text"
+        android:textSize="20sp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"
+        android:id="@+id/main_rv_item_ivi_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="100"/>
+</RelativeLayout>
