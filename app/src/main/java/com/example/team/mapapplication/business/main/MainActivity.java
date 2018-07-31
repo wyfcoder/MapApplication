@@ -3,11 +3,9 @@ package com.example.team.mapapplication.business.main;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,9 +15,9 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -27,39 +25,31 @@ import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
-import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
-import com.baidu.mapapi.map.BitmapDescriptor;
-import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.Gradient;
 import com.baidu.mapapi.map.HeatMap;
-import com.baidu.mapapi.map.InfoWindow;
+import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
-import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationData;
-import com.baidu.mapapi.map.OverlayOptions;
-import com.baidu.mapapi.map.Text;
 import com.baidu.mapapi.model.LatLng;
 import com.blankj.utilcode.util.ToastUtils;
 import com.example.team.mapapplication.R;
 import com.example.team.mapapplication.base.BaseActivity;
 import com.example.team.mapapplication.base.BaseModel;
-import com.example.team.mapapplication.base.IBaseViewModel;
 import com.example.team.mapapplication.bean.InputValueInfo;
 import com.example.team.mapapplication.engine.QMUIEditTextDialogGenerator;
+import com.example.team.mapapplication.engine.ViewLocationHelper;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
-import com.qmuiteam.qmui.widget.dialog.QMUIDialogBuilder;
 import com.qmuiteam.qmui.widget.popup.QMUIPopup;
 
 import org.byteam.superadapter.OnItemClickListener;
 import org.byteam.superadapter.OnItemLongClickListener;
 import org.byteam.superadapter.SuperAdapter;
 import org.byteam.superadapter.SuperViewHolder;
-import org.byteam.superadapter.animation.SlideInLeftAnimation;
 
 
 import java.util.List;
@@ -101,6 +91,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
                 .gradient(gradient)
                 .build();
         mBaiduMap.addHeatMap(mHeatMap);
+
+        mDrawerLayout.closeDrawer(Gravity.LEFT);
     }
 
     @Override
@@ -108,11 +100,13 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         if (mHeatMap != null){
             mHeatMap.removeHeatMap();
         }
+        mDrawerLayout.closeDrawer(Gravity.LEFT);
     }
 
     @Override
     public void refreshInfoList() {
         mAdapter.notifyDataSetChanged();
+        mItemCountView.setText(mAdapter.getItemCount() + "");
     }
 
     @Override
@@ -145,7 +139,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         mModel.setDataWaiting(false);
         ToastUtils.showShort("完毕");
         mProgressBar.setVisibility(View.INVISIBLE);
-
     }
 
     @Override
@@ -171,6 +164,82 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         deletePopup.setAnimStyle(QMUIPopup.ANIM_GROW_FROM_CENTER);
         deletePopup.show(itemView);
     }
+
+    @Override
+    public void hideFloatingViews() {
+        if (mToolbar != null){
+            animateToolbar(-mToolbar.getHeight());
+            if (mModel.getModeStatus() == MainViewModel.EDIT_MODE) {
+                hideEditViews();
+            } else if (mModel.getModeStatus() == MainViewModel.WIFI_MODE) {
+                hideWifiViews();
+            }
+        }
+    }
+
+    private void animateWifiModeViews(float value, float value2) {
+        mStartPickBtn.animate().translationY(value);
+        mEndPickBtn.animate().translationY(value2);
+    }
+
+    private void animateEditModeViews(float value, float value2) {
+        mToEditBtn.animate().translationY(value); //TODO 待修改
+        mLocateBtn.animate().translationY(value2);
+    }
+
+    private void animateToolbar(int value) {
+        mToolbar.animate().translationY(value);
+    }
+
+    @Override
+    public void showFloatingViews() {
+        if (mToolbar != null){
+            animateToolbar(0);
+            if (mModel.getModeStatus() == MainViewModel.EDIT_MODE) {
+                showEditViews();
+            } else if (mModel.getModeStatus() == MainViewModel.WIFI_MODE) {
+                showWifiViews();
+            }
+        }
+    }
+
+
+    @Override
+    public void transferToEditModeView() {
+        mToolbar.setSubtitle("编辑模式");
+        hideWifiViews();
+        showEditViews();
+    }
+
+    @Override
+    public void transferToWifiModeView() {
+        mToolbar.setSubtitle("信号模式");
+        hideEditViews();
+        showWifiViews();
+    }
+
+    @Override
+    public void showWifiViews() {
+        animateWifiModeViews(0, 0);
+    }
+
+    @Override
+    public void hideWifiViews() {
+        int spBtnY = ViewLocationHelper.getAbsoluteLocationOnScreen(mStartPickBtn)[1]; //使用getY()获得的是相对于父控件的坐标，这里直接用屏幕绝对坐标统一
+        int epBtnY = ViewLocationHelper.getAbsoluteLocationOnScreen(mEndPickBtn)[1];
+        animateWifiModeViews(mModel.getScreenHeight() - spBtnY, mModel.getScreenHeight() - epBtnY);
+    }
+
+    @Override
+    public void showEditViews() {
+        animateEditModeViews(0, 0);
+    }
+
+    @Override
+    public void hideEditViews() {
+        animateEditModeViews(mModel.getScreenHeight() - mToEditBtn.getY(), mModel.getScreenHeight() - mLocateBtn.getY());
+    }
+
 
     @Override
     public Context getContext() {
@@ -210,12 +279,18 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
     }
 
+
+    private LinearLayout mWifiViewsContainer;
+    private TextView mItemCountView;
+    private Button mStartPickBtn;
+    private Button mEndPickBtn;
     private ProgressBar mProgressBar;
     private DrawerLayout mDrawerLayout;
     private Button mRemoveHeatMapBtn;
     private Button mDrawHeatMapBtn;
     private Button mLocBtn;
     private FloatingActionButton mToEditBtn;
+    private FloatingActionButton mLocateBtn;
     private MapView mMapView;
     private RecyclerView mReView;
 
@@ -228,17 +303,36 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
     private MainViewModel mModel = new MainViewModel();
 
+
+    @Override
+    protected CharSequence getToolbarTitle() {
+        return "热图绘制工具";
+    }
+
+    @Override
+    protected CharSequence getSubTitle() {
+        return "编辑模式";
+    }
+
     @Override
     protected MainPresenter createPresenter() {
         return new MainPresenter();
     }
 
     @Override
+    protected void onHomeIndicatorClicked() {
+        mDrawerLayout.openDrawer(Gravity.LEFT);
+        super.onHomeIndicatorClicked();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SDKInitializer.initialize(getApplicationContext());
-        setContentView(R.layout.activity_main);
+
+
         mPresenter.attach(this);
+
+        mModel.setScreenHeight(getResources().getDisplayMetrics().heightPixels);
 
         initialInit();
 
@@ -248,9 +342,24 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
         initLocationClient();
 
+        initiallyHideWifiViews();
+
 
         mLocationClient.start();
         mLocationClient.requestLocation();
+    }
+
+    private void initiallyHideWifiViews() {
+        int spBtnY = ViewLocationHelper.getAbsoluteLocationOnScreen(mStartPickBtn)[1]; //使用getY()获得的是相对于父控件的坐标，这里直接用屏幕绝对坐标统一
+        int epBtnY = ViewLocationHelper.getAbsoluteLocationOnScreen(mEndPickBtn)[1];
+        int screenHeight = mModel.getScreenHeight();
+        mStartPickBtn.setY(screenHeight - spBtnY);
+        mEndPickBtn.setY(screenHeight - epBtnY);
+    }
+
+    @Override
+    protected int getContentViewId() {
+        return R.layout.activity_main;
     }
 
     private void initRecyclerView() {
@@ -300,6 +409,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
             }
         });
 
+        mItemCountView.setText(mAdapter.getItemCount() + "");
+
         mReView.setItemAnimator(new SlideInLeftAnimator()); // 由于还要设置Notify，所以暂时没有效果
 
         mReView.setNestedScrollingEnabled(false);
@@ -318,7 +429,28 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     }
 
     private void initClickListener() {
-        mLocBtn.setOnClickListener(new View.OnClickListener() {
+
+        mBaiduMap.setOnMapClickListener(new BaiduMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                mPresenter.animateFloatingViews();
+            }
+
+            @Override
+            public boolean onMapPoiClick(MapPoi mapPoi) {
+                return false;
+            }
+        });
+
+
+        mStartPickBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPresenter.startPick();
+            }
+        });
+
+        mLocateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mPresenter.animateToLoc();
@@ -332,8 +464,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         });
         mRemoveHeatMapBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                mPresenter.removeHeatMap();
+            public void onClick(View v) {mPresenter.removeHeatMap();
             }
         });
 
@@ -371,12 +502,17 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     }
 
     private void initialInit() {
+        mWifiViewsContainer = findViewById(R.id.main_ll_wifi_mode);
+        mItemCountView = findViewById(R.id.main_rl_data_description_tv_count);
+        mStartPickBtn = findViewById(R.id.main_btn_start_pick);
+        mEndPickBtn = findViewById(R.id.main_btn_end_pick);
+        mLocateBtn = findViewById(R.id.main_fab_locate);
         mProgressBar = findViewById(R.id.main_pb_wait);
         mDrawerLayout = findViewById(R.id.main_dl);
         mReView = findViewById(R.id.main_rv_show_data);
         mToEditBtn = findViewById(R.id.main_fab_to_edit);
-        mRemoveHeatMapBtn = findViewById(R.id.main_btn_rhm);
-        mDrawHeatMapBtn = findViewById(R.id.main_btn_dhm);
+        mRemoveHeatMapBtn = findViewById(R.id.main_rl_ll_b_c_btn_clear);
+        mDrawHeatMapBtn = findViewById(R.id.main_rl_ll_b_c_btn_draw);
         mLocBtn = findViewById(R.id.main_btn_loc);
         mMapView = findViewById(R.id.main_mv);
         mBaiduMap = mMapView.getMap();
@@ -399,8 +535,15 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
-            case R.id.menu_item_open_drawer:
-                mDrawerLayout.openDrawer(Gravity.LEFT);
+            case R.id.menu_item_edit_mode:
+                if (mModel.getModeStatus() != MainViewModel.EDIT_MODE){
+                    mPresenter.transferToEditMode();
+                }
+                break;
+            case R.id.menu_item_wifi_mode:
+                if (mModel.getModeStatus() != MainViewModel.WIFI_MODE){
+                    mPresenter.transferToWifiMode();
+                }
                 break;
         }
         return super.onOptionsItemSelected(item);

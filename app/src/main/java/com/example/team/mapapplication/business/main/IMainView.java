@@ -31,4 +31,21 @@ public interface IMainView extends IBaseView, IBaseViewModel{
     void notifyWaitFinished();
 
     void showDeletePopup(View itemView, int position);
+
+    void hideFloatingViews();
+
+    void showFloatingViews();
+
+    void transferToWifiModeView();
+
+    void showWifiViews();
+
+    void hideWifiViews();
+
+    void showEditViews();
+
+    void hideEditViews();
+
+    void transferToEditModeView();
+
 }

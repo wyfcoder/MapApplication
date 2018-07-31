@@ -11,16 +11,121 @@
         android:layout_height="match_parent"
         tools:context="com.example.team.mapapplication.business.main.MainActivity">
 
-        <com.baidu.mapapi.map.MapView
-            android:id="@+id/main_mv"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        </com.baidu.mapapi.map.MapView>
+            <com.baidu.mapapi.map.MapView
+                android:id="@+id/main_mv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </com.baidu.mapapi.map.MapView>
 
 
+            <Button
+                android:visibility="invisible"
+                android:id="@+id/main_btn_loc"
+                android:text="LocateNow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:visibility="gone"
+                android:layout_alignParentRight="true"
+                android:text="Draw HeatMap"
+                android:id="@+id/main_btn_dhm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:visibility="invisible"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:text="Remove HeatMap"
+                android:id="@+id/main_btn_rhm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+
+            <android.support.design.widget.FloatingActionButton
+                android:src="@drawable/ic_edit_fab"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="90dp"
+                android:layout_marginRight="30dp"
+                android:id="@+id/main_fab_to_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/main_fab_locate"
+                android:src="@drawable/ic_locate_fab"
+                android:layout_alignRight="@id/main_fab_to_edit"
+                android:layout_marginBottom="10dp"
+                android:layout_above="@id/main_fab_to_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundLinearLayout
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="100dp"
+                android:layout_alignParentBottom="true"
+                android:orientation="horizontal"
+                android:id="@+id/main_ll_wifi_mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp">
+                <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
+                    android:id="@+id/main_btn_start_pick"
+                    android:layout_marginRight="10dp"
+                    app:qmui_radius="3dp"
+                    android:textColor="@color/sky_blue"
+                    app:qmui_borderColor="@color/sky_blue"
+                    app:qmui_backgroundColor="@color/qmui_config_color_white"
+                    android:elevation="5dp"
+                    android:textSize="16sp"
+                    android:paddingLeft="3dp"
+                    android:paddingRight="3dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:text="开始记录"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
+                    android:id="@+id/main_btn_end_pick"
+                    android:textColor="@color/qmui_config_color_white"
+                    app:qmui_borderColor="@color/sky_blue"
+                    app:qmui_backgroundColor="@color/sky_blue"
+                    app:qmui_radius="3dp"
+                    android:elevation="5dp"
+                    android:textSize="16sp"
+                    android:text="停止记录"
+                    android:paddingLeft="3dp"
+                    android:paddingRight="3dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </com.qmuiteam.qmui.widget.roundwidget.QMUIRoundLinearLayout>
+
+        </RelativeLayout>
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:background="@color/sky_blue"
+            app:titleTextColor="@color/qmui_config_color_white"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:elevation="5dp">
+        </android.support.v7.widget.Toolbar>
 
         <ProgressBar
+            android:layout_below="@id/toolbar"
             style="?android:attr/progressBarStyle"
             android:visibility="invisible"
             android:layout_marginTop="10dp"
@@ -29,34 +134,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-
-        <Button
-            android:id="@+id/main_btn_loc"
-            android:text="LocateNow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:layout_alignParentRight="true"
-            android:text="Draw HeatMap"
-            android:id="@+id/main_btn_dhm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:text="Remove HeatMap"
-            android:id="@+id/main_btn_rhm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-
-        <android.support.design.widget.FloatingActionButton
-            android:layout_above="@id/main_btn_rhm"
-            android:id="@+id/main_fab_to_edit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -71,6 +148,7 @@
             android:layout_width="240dp"
             android:layout_height="wrap_content">
             <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
+                android:id="@+id/main_rl_ll_b_c_btn_draw"
                 android:text="绘图"
                 android:paddingTop="3dp"
                 android:paddingBottom="3dp"
@@ -80,6 +158,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundButton
+                android:id="@+id/main_rl_ll_b_c_btn_clear"
                 android:text="清除"
                 android:paddingTop="3dp"
                 android:paddingBottom="3dp"
@@ -90,10 +169,60 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
+        <View
+            android:layout_alignTop="@id/main_rl_ll_btn_container"
+            android:background="@color/sky_blue"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"/>
+
+        <RelativeLayout
+            android:id="@+id/main_rl_data_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true">
+            <TextView
+                android:id="@+id/main_rl_data_description_tv_pretext"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="3dp"
+                android:textSize="18sp"
+                android:text="当前有:"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:layout_alignBottom="@id/main_rl_data_description_tv_pretext"
+                android:layout_toRightOf="@id/main_rl_data_description_tv_pretext"
+                android:id="@+id/main_rl_data_description_tv_count"
+                android:textSize="20sp"
+                android:textColor="@color/qmui_btn_blue_text"
+                android:text="67"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:layout_alignBottom="@id/main_rl_data_description_tv_count"
+                android:layout_toRightOf="@id/main_rl_data_description_tv_count"
+                android:id="@+id/main_rl_data_description_tv_postext"
+                android:text=" 条数据"
+                android:textSize="18sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+
+        <View
+            android:background="@color/sky_blue"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="0.5dp"
+            android:layout_below="@id/main_rl_data_description"
+            android:id="@+id/main_v_upper_divider_line"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"/>
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/main_rv_show_data"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
+            android:layout_below="@id/main_v_upper_divider_line"
             android:layout_above="@id/main_rl_ll_btn_container">
         </android.support.v7.widget.RecyclerView>
     </RelativeLayout>

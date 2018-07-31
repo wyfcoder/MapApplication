@@ -7,7 +7,6 @@ import com.example.team.mapapplication.base.BaseModel;
 import com.example.team.mapapplication.bean.InputValueInfo;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -17,12 +16,22 @@ import java.util.Random;
  * Created by Ellly on 2018/7/24.
  */
 
+/**
+ * 用于保存、获取和上传各类MainActivity内的产生的数据
+ */
 public class MainViewModel extends BaseModel {
+
+    public static final int EDIT_MODE = 1;
+    public static final int WIFI_MODE = 0;
+
     private LatLng mLocInfo;
     private Boolean mIsFirstLoc;
     private float mRadius;
     private List<InputValueInfo> mInfos = new ArrayList<>();
     private boolean isDataWaiting = false;
+    private boolean isToolbarHide = false;
+    private int mModeStatus = 1;
+    private int mScreenHeight;
 
     public void setLatLng(LatLng latLng){
         mLocInfo = latLng;
@@ -119,4 +128,27 @@ public class MainViewModel extends BaseModel {
         return mInfos;
     }
 
+    public boolean isToolbarHide() {
+        return isToolbarHide;
+    }
+
+    public void setToolbarHide(boolean toolbarHide) {
+        isToolbarHide = toolbarHide;
+    }
+
+    public void setModeStatus(int modeStatus) {
+        this.mModeStatus = modeStatus;
+    }
+
+    public int getModeStatus() {
+        return mModeStatus;
+    }
+
+    public void setScreenHeight(int screenHeight) {
+        this.mScreenHeight = screenHeight;
+    }
+
+    public int getScreenHeight() {
+        return mScreenHeight;
+    }
 }

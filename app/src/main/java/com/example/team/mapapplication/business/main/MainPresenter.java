@@ -18,6 +18,9 @@ public class MainPresenter extends BasePresenter<IMainView> {
     private HeatMapHandler mHandler;
     private LocateFinishHandler mLocateFinishedHandler;
 
+    //for test
+    private LocateFinishHandler mRepeatingLocationRequiringHandler;
+
     @Override
     public void attach(IMainView view) {
         super.attach(view);
@@ -119,5 +122,47 @@ public class MainPresenter extends BasePresenter<IMainView> {
 
     public void deleteThisItem(View itemView, int viewType, int position) {
         mView.showDeletePopup(itemView, position);
+    }
+
+    public void showFloatingViews() {
+        mModel.setToolbarHide(false);
+        mView.showFloatingViews();
+    }
+
+    public void hideFloatingViews() {
+        mModel.setToolbarHide(true);
+        mView.hideFloatingViews();
+    }
+
+    public void animateFloatingViews() {
+        ToastUtils.showShort("MapView Clicked");
+        if (mModel.isToolbarHide()){
+            showFloatingViews();
+        }else {
+            hideFloatingViews();
+        }
+    }
+
+    public void transferToWifiMode() {
+        mModel.setModeStatus(MainViewModel.WIFI_MODE);
+        mView.transferToWifiModeView();
+        mModel.getInputValueInfos().clear();
+        refreshInfoList();
+    }
+
+    public void transferToEditMode() {
+        mModel.setModeStatus(MainViewModel.EDIT_MODE);
+        mView.transferToEditModeView();
+        mModel.getInputValueInfos().clear();
+        refreshInfoList();
+    }
+
+    public void startPick() {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        };
     }
 }
