@@ -3,6 +3,8 @@ package com.example.team.mapapplication.business.main;
 import android.util.Log;
 
 import com.baidu.mapapi.model.LatLng;
+import com.blankj.utilcode.util.SPUtils;
+import com.blankj.utilcode.util.TimeUtils;
 import com.example.team.mapapplication.base.BaseModel;
 import com.example.team.mapapplication.bean.InputValueInfo;
 
@@ -110,6 +112,8 @@ public class MainViewModel extends BaseModel {
     }
 
     public void saveInfo(String info) {
+
+        SPUtils.getInstance().put(TimeUtils.getNowString(), info);
 
         InputValueInfo e = new InputValueInfo();
         e.setLatLng(getLatLng());

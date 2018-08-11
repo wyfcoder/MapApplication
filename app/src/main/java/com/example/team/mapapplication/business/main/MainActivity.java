@@ -1,8 +1,12 @@
 package com.example.team.mapapplication.business.main;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -39,6 +43,8 @@ import com.example.team.mapapplication.R;
 import com.example.team.mapapplication.base.BaseActivity;
 import com.example.team.mapapplication.base.BaseModel;
 import com.example.team.mapapplication.bean.InputValueInfo;
+import com.example.team.mapapplication.business.background_functions.location.IntereactionForLocation;
+import com.example.team.mapapplication.business.background_functions.location.LocationService;
 import com.example.team.mapapplication.engine.QMUIEditTextDialogGenerator;
 import com.example.team.mapapplication.engine.ViewLocationHelper;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
@@ -111,8 +117,15 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
     @Override
     public void startLocate() {
-        mLocationClient.start();
-        mLocationClient.requestLocation();
+//        mLocationClient.start();  abandon the previous way of locating. wyy
+//        mLocationClient.requestLocation();
+
+        if (mLocationService == null){
+            // in case of unexpected disconnection between activity and service. wyy
+            bindService(new Intent(this, LocationService.class), mConnection, BIND_AUTO_CREATE);
+        }
+        // call the onStartCommand() method by starting this service. wyy
+        startService(new Intent(this, LocationService.class));
     }
 
     @Override
@@ -251,6 +264,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         return mModel;
     }
 
+
     public class MyLocationListener extends BDAbstractLocationListener{
 
         @Override
@@ -274,10 +288,43 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
             mPresenter.animateToLoc();
 
-            mPresenter.sendLocateFinishedMessage();
+//            mPresenter.sendLocateFinishedMessage();
+
+
         }
 
     }
+
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mLocationService = ((LocationService.ServiceBinder) service).getService();
+            mLocationService.setLocationInterface(new IntereactionForLocation() {
+                @Override
+                public void passLocation(LatLng latLng, double radius) {
+                    mModel.setLatLng(latLng);
+                    mModel.setRadius((float) radius);
+
+                    mPresenter.setLocationData();
+
+                    if (isFirstLoc){
+                        mPresenter.animateToLoc();  // drawloc suffices to show the position, the animation will take place only after launch the app. wyy
+                        isFirstLoc = false;
+                    }
+
+
+                }
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mLocationService = null;
+        }
+    };
+
+    private LocationService mLocationService;
 
 
     private LinearLayout mWifiViewsContainer;
@@ -329,6 +376,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        bindService(new Intent(this, LocationService.class), mConnection, BIND_AUTO_CREATE);
+        startService(new Intent(this, LocationService.class));
 
         mPresenter.attach(this);
 
@@ -344,9 +393,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
         initiallyHideWifiViews();
 
-
-        mLocationClient.start();
-        mLocationClient.requestLocation();
+        startLocate();
     }
 
     private void initiallyHideWifiViews() {
@@ -453,6 +500,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         mLocateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                startLocate();
                 mPresenter.animateToLoc();
             }
         });
@@ -553,6 +601,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     protected void onDestroy() {
         super.onDestroy();
         mMapView.onDestroy();
+        if (mConnection != null){
+            unbindService(mConnection);
+        }
+        stopService(new Intent(this, LocationService.class));
     }
 
     @Override

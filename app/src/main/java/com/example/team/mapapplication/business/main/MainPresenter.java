@@ -6,7 +6,7 @@ import android.view.View;
 import com.baidu.mapapi.model.LatLng;
 import com.blankj.utilcode.util.ToastUtils;
 import com.example.team.mapapplication.base.BasePresenter;
-import com.example.team.mapapplication.engine.HeatMapHandler;
+import com.example.team.mapapplication.engine.RepeatHandler;
 import com.example.team.mapapplication.engine.LocateFinishHandler;
 
 import java.util.List;
@@ -14,8 +14,9 @@ import java.util.NoSuchElementException;
 
 
 public class MainPresenter extends BasePresenter<IMainView> {
+    private static final boolean LOCATE_DEBUG = true;
     private MainViewModel mModel;
-    private HeatMapHandler mHandler;
+    private RepeatHandler mHandler;
     private LocateFinishHandler mLocateFinishedHandler;
 
     //for test
@@ -31,6 +32,7 @@ public class MainPresenter extends BasePresenter<IMainView> {
      * 移动到定位位置
      */
     public void animateToLoc() {
+
         mView.animateToLocation();
     }
 
@@ -46,7 +48,7 @@ public class MainPresenter extends BasePresenter<IMainView> {
 
     public void drawHeatMap() {
         // 大宗数据下异步加载热图，设置绘图核心Runnable
-        mHandler = new HeatMapHandler(new Runnable() {
+        mHandler = new RepeatHandler(new Runnable() {
             @Override
             public void run() {
 
@@ -72,7 +74,8 @@ public class MainPresenter extends BasePresenter<IMainView> {
             }
         });
         //开启循环。
-        mHandler.sendEmptyMessage(HeatMapHandler.DRAW_HEAT_MAP_MESSAGE_MARK);
+        mHandler.setMessageMark(108);
+        mHandler.start();
     }
 
     public void removeHeatMap() {
@@ -98,7 +101,9 @@ public class MainPresenter extends BasePresenter<IMainView> {
             }
         };
         mLocateFinishedHandler = new LocateFinishHandler(saveInfoRunnable);
-        mView.startLocate();
+//        mView.startLocate();  // Considering that currently the location service is always on so here I just assume that the location request has finished.
+                                // the delay interval serves to imitate the data writing process(usually it is thought time-consumed hhh). wyy
+        mLocateFinishedHandler.sendEmptyMessageDelayed(MainActivity.LOCATE_FINISHED, 500);
         mView.notifyWaitStart();
     }
 
@@ -118,6 +123,28 @@ public class MainPresenter extends BasePresenter<IMainView> {
         if (mLocateFinishedHandler != null){
             mLocateFinishedHandler.sendEmptyMessage(MainActivity.LOCATE_FINISHED);
         }
+        if (LOCATE_DEBUG){
+            if (mRepeatingLocationRequiringHandler == null){
+                initRequiringHandlerIfNeed();
+            }
+            mRepeatingLocationRequiringHandler.sendEmptyMessageDelayed(MainActivity.LOCATE_FINISHED, 7000);
+        }
+    }
+
+    private void initRequiringHandlerIfNeed() {
+        Runnable saveInfoRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mModel.saveInfo("10");
+                mView.drawMarkerOverlay(mModel.getLatLng(), "10"); //暂时弃用了
+                mView.refreshInfoList();
+                mView.notifyWaitFinished();
+                startPick();
+                ToastUtils.showShort("定位结束开始下一次定位");
+            }
+        };
+        mRepeatingLocationRequiringHandler = new LocateFinishHandler(saveInfoRunnable);
+
     }
 
     public void deleteThisItem(View itemView, int viewType, int position) {
@@ -158,11 +185,7 @@ public class MainPresenter extends BasePresenter<IMainView> {
     }
 
     public void startPick() {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        };
+        mView.startLocate();
+        mView.notifyWaitStart();
     }
 }
