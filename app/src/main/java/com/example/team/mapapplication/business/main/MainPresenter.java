@@ -196,4 +196,22 @@ public class MainPresenter extends BasePresenter<IMainView> {
         mView.startLocate();
         mView.notifyWaitStart();
     }
+
+    /**
+     * save the current values of the list and the description (display) to the DB
+     * @param text file's name
+     */
+    public int saveValuesToDB(String text) {
+        if (mModel.getInputValueInfos().size() <= 0){
+            ToastUtils.showShort("当前数据为空");
+            return -1;
+        }else if ("".equals(text)){
+            ToastUtils.showShort("当前文件名为空");
+            return -2;
+        }
+        mModel.saveValuesToDB(text);
+        mModel.saveDisplayToDB(text);
+        ToastUtils.showShort("存储完成");
+        return 0;
+    }
 }

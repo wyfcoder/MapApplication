@@ -5,10 +5,15 @@ import android.util.Log;
 import com.baidu.mapapi.model.LatLng;
 import com.blankj.utilcode.util.SPUtils;
 import com.blankj.utilcode.util.TimeUtils;
+import com.blankj.utilcode.util.ToastUtils;
 import com.example.team.mapapplication.base.BaseModel;
+import com.example.team.mapapplication.bean.DataDisplayInfo;
 import com.example.team.mapapplication.bean.InputValueInfo;
 
+import org.litepal.LitePal;
+
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -169,16 +174,61 @@ public class MainViewModel extends BaseModel {
     }
 
     public List<InputValueInfo> getDisplayData() {
+        /* mocking data
         for (int i = 0; i < 20; i++) {
             InputValueInfo e = new InputValueInfo();
             e.setValue(12.2 + i);
             e.setLatLng(new LatLng(34.1 + i, 108.3 + i));
             mDisplayData.add(e);
+        }*/
+
+        mDisplayData = LitePal.where("fileName = ?", getDisplayFileName()).find(InputValueInfo.class);
+        for (InputValueInfo ivi : mDisplayData){
+            ivi.setLatLng(new LatLng(ivi.getLatitude(), ivi.getLongitude()));
         }
         return mDisplayData;
     }
 
     public void setDisplayData(List<InputValueInfo> mDisplayData) {
         this.mDisplayData = mDisplayData;
+    }
+
+    public void saveValuesToDB(String text) {
+        // save the current data with the assigned file name. wyy
+
+        List<InputValueInfo> data = getInputValueInfos();
+
+        List<InputValueInfo> preData = LitePal.where("fileName = ?", text).find(InputValueInfo.class);
+
+        // delete the previous same-named data and re-save the new ones.
+        if (preData != null && preData.size() > 0){
+            LitePal.deleteAll(InputValueInfo.class, "fileName = ?", text);
+        }
+        for (InputValueInfo d : data){
+            d.setFileName(text);
+            // accidentally find that LitePal seems not able to deal with parcelable class...
+            d.setLatitude(d.getLatLng().latitude);
+            d.setLongitude(d.getLatLng().longitude);
+            Log.d("Data Info", "Data Info: \n" + d.getFileName() + "\n" + d.getValue() + "\n" + d.getLatLng());
+            d.save();
+        }
+
+    }
+
+    public void saveDisplayToDB(String text) {
+        // save the saving behavior as another table. wyy
+
+        DataDisplayInfo di = new DataDisplayInfo();
+        di.setFileName(text);
+        di.setCalendar(Calendar.getInstance());
+
+        List<DataDisplayInfo> preData = LitePal.where("mFileName = ?", text).find(DataDisplayInfo.class);
+
+        // determine whether the mFileName has been used. If not, then save it or it will be updated.
+        if (preData == null || preData.size() <= 0){
+            di.save();
+        }else {
+            di.updateAll("mFileName = ?", text);
+        }
     }
 }

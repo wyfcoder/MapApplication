@@ -68,6 +68,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/main_fab_save"
+                android:src="@drawable/ic_save_fab"
+                android:layout_alignRight="@id/main_fab_to_edit"
+                android:layout_marginBottom="10dp"
+                android:layout_above="@id/main_fab_locate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
             <com.qmuiteam.qmui.widget.roundwidget.QMUIRoundLinearLayout
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"

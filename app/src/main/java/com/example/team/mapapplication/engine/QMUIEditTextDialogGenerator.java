@@ -32,7 +32,12 @@ public abstract class QMUIEditTextDialogGenerator {
                     }
                 });
         mDialog = mBuilder.create();
+//        mBuilder.getEditText().setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+    }
+
+    public QMUIEditTextDialogGenerator setNumbericInputType(){
         mBuilder.getEditText().setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        return this;
     }
 
     protected abstract void onPositiveClick(QMUIDialog dialog, int index, String text);

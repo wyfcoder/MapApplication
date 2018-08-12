@@ -41,4 +41,5 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.jaeger.statusbarutil:library:1.4.0'
+    implementation 'org.litepal.android:core:2.0.0'
 }

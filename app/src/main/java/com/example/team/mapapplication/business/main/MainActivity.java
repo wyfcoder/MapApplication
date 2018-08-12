@@ -42,6 +42,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.example.team.mapapplication.R;
 import com.example.team.mapapplication.base.BaseActivity;
 import com.example.team.mapapplication.base.BaseModel;
+import com.example.team.mapapplication.bean.DataDisplayInfo;
 import com.example.team.mapapplication.bean.InputValueInfo;
 import com.example.team.mapapplication.business.background_functions.location.IntereactionForLocation;
 import com.example.team.mapapplication.business.background_functions.location.LocationService;
@@ -59,6 +60,7 @@ import org.byteam.superadapter.SuperAdapter;
 import org.byteam.superadapter.SuperViewHolder;
 
 
+import java.util.Calendar;
 import java.util.List;
 
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
@@ -196,9 +198,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         mEndPickBtn.animate().translationY(value2);
     }
 
-    private void animateEditModeViews(float value, float value2) {
+    private void animateEditModeViews(float value, float value2, float value3) {
         mToEditBtn.animate().translationY(value); //TODO 待修改
         mLocateBtn.animate().translationY(value2);
+        mSaveBtn.animate().translationY(value3);
     }
 
     private void animateToolbar(int value) {
@@ -259,12 +262,13 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
     @Override
     public void showEditViews() {
-        animateEditModeViews(0, 0);
+        animateEditModeViews(0, 0, 0);
     }
 
     @Override
     public void hideEditViews() {
-        animateEditModeViews(mModel.getScreenHeight() - mToEditBtn.getY(), mModel.getScreenHeight() - mLocateBtn.getY());
+        animateEditModeViews(mModel.getScreenHeight() - mToEditBtn.getY(), mModel.getScreenHeight() - mLocateBtn.getY(), mModel.getScreenHeight() - mSaveBtn.getY());
+
     }
 
 
@@ -350,6 +354,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     private Button mRemoveHeatMapBtn;
     private Button mDrawHeatMapBtn;
     private Button mLocBtn;
+    private FloatingActionButton mSaveBtn;
     private FloatingActionButton mToEditBtn;
     private FloatingActionButton mLocateBtn;
     private MapView mMapView;
@@ -470,7 +475,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
                         mPresenter.refreshInfoList();
                     }
-                }.getDialog();
+                }.setNumbericInputType().getDialog();
 
                 dialog.show();
 
@@ -515,6 +520,23 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
             @Override
             public void onClick(View v) {
                 mPresenter.startPick();
+            }
+        });
+
+        mSaveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                QMUIDialog dialog = new QMUIEditTextDialogGenerator(getContext(), "输入文件名"){
+
+                    @Override
+                    protected void onPositiveClick(QMUIDialog dialog, int index, String text) {
+                        int state = mPresenter.saveValuesToDB(text);
+                        if (state == 0){
+                            dialog.dismiss();
+                        }
+                    }
+                }.getDialog();
+                dialog.show();
             }
         });
 
@@ -571,6 +593,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     }
 
     private void initialInit() {
+        mSaveBtn = findViewById(R.id.main_fab_save);
         mWifiViewsContainer = findViewById(R.id.main_ll_wifi_mode);
         mItemCountView = findViewById(R.id.main_rl_data_description_tv_count);
         mStartPickBtn = findViewById(R.id.main_btn_start_pick);
