@@ -45,6 +45,7 @@ import com.example.team.mapapplication.base.BaseModel;
 import com.example.team.mapapplication.bean.InputValueInfo;
 import com.example.team.mapapplication.business.background_functions.location.IntereactionForLocation;
 import com.example.team.mapapplication.business.background_functions.location.LocationService;
+import com.example.team.mapapplication.business.retrieve.RetrieveActivity;
 import com.example.team.mapapplication.engine.QMUIEditTextDialogGenerator;
 import com.example.team.mapapplication.engine.ViewLocationHelper;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
@@ -225,6 +226,19 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     }
 
     @Override
+    public void transferToDisplayModeView() {
+
+        mToolbar.setSubtitle("展示模式");
+
+        hideEditViews();
+        hideWifiViews();
+
+        // animate to draw area. wyy
+        MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newLatLng(mModel.getDisplayData().get(0).getLatLng());
+        mBaiduMap.animateMapStatus(mapStatusUpdate);
+    }
+
+    @Override
     public void transferToWifiModeView() {
         mToolbar.setSubtitle("信号模式");
         hideEditViews();
@@ -376,9 +390,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        bindService(new Intent(this, LocationService.class), mConnection, BIND_AUTO_CREATE);
-        startService(new Intent(this, LocationService.class));
-
         mPresenter.attach(this);
 
         mModel.setScreenHeight(getResources().getDisplayMetrics().heightPixels);
@@ -393,7 +404,17 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
         initiallyHideWifiViews();
 
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("display_only", false)){
+            mModel.setDisplayFileName(intent.getStringExtra("file_name"));
+            mPresenter.transferToDisplayMode();
+            return;
+        }
+
         startLocate();
+
+        bindService(new Intent(this, LocationService.class), mConnection, BIND_AUTO_CREATE);
+        startService(new Intent(this, LocationService.class));
     }
 
     private void initiallyHideWifiViews() {
@@ -576,7 +597,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.input_topbar_menu, menu);
+        if (mModel.getModeStatus() != MainViewModel.DISPLAY_MODE){
+            getMenuInflater().inflate(R.menu.input_topbar_menu, menu);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -593,6 +616,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
                     mPresenter.transferToWifiMode();
                 }
                 break;
+            case R.id.menu_item_data:
+                startActivity(new Intent(this, RetrieveActivity.class));
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -601,10 +627,12 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     protected void onDestroy() {
         super.onDestroy();
         mMapView.onDestroy();
-        if (mConnection != null){
-            unbindService(mConnection);
+        if (mModel.getModeStatus() != MainViewModel.DISPLAY_MODE){
+            if (mConnection != null){
+                unbindService(mConnection);
+            }
+            stopService(new Intent(this, LocationService.class));
         }
-        stopService(new Intent(this, LocationService.class));
     }
 
     @Override

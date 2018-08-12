@@ -48,4 +48,5 @@ public interface IMainView extends IBaseView, IBaseViewModel{
 
     void transferToEditModeView();
 
+    void transferToDisplayModeView();
 }

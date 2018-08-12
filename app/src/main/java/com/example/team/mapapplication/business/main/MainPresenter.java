@@ -9,6 +9,7 @@ import com.example.team.mapapplication.base.BasePresenter;
 import com.example.team.mapapplication.engine.RepeatHandler;
 import com.example.team.mapapplication.engine.LocateFinishHandler;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -182,6 +183,13 @@ public class MainPresenter extends BasePresenter<IMainView> {
         mView.transferToEditModeView();
         mModel.getInputValueInfos().clear();
         refreshInfoList();
+    }
+
+    public void transferToDisplayMode() {
+        mModel.setModeStatus(MainViewModel.DISPLAY_MODE);
+        mModel.getInputValueInfos().addAll(mModel.getDisplayData());
+        refreshInfoList();
+        mView.transferToDisplayModeView();
     }
 
     public void startPick() {

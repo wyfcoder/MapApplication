@@ -4,9 +4,9 @@
     android:layout_height="wrap_content"
     android:layout_margin="10dp">
     <TextView
-        android:textColor="@color/qmui_btn_blue_text"
         android:id="@+id/main_rv_item_tv_latitude_describe"
         android:text="经度:"
+        android:textColor="@color/qmui_btn_blue_text"
         android:textSize="16sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

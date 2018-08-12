@@ -25,6 +25,7 @@ public class MainViewModel extends BaseModel {
 
     public static final int EDIT_MODE = 1;
     public static final int WIFI_MODE = 0;
+    public static final int DISPLAY_MODE = 2;
 
     private LatLng mLocInfo;
     private Boolean mIsFirstLoc;
@@ -34,6 +35,8 @@ public class MainViewModel extends BaseModel {
     private boolean isToolbarHide = false;
     private int mModeStatus = 1;
     private int mScreenHeight;
+    private String mDisplayFileName;
+    private List<InputValueInfo> mDisplayData = new ArrayList<>();
 
     public void setLatLng(LatLng latLng){
         mLocInfo = latLng;
@@ -123,12 +126,13 @@ public class MainViewModel extends BaseModel {
     }
 
     public List<InputValueInfo> getInputValueInfos(){
-        for (int i = 0; i < 20; i++){
+        // mocking data wyy
+        /*for (int i = 0; i < 20; i++){
             InputValueInfo e = new InputValueInfo();
             e.setValue(12.2 + i);
             e.setLatLng(new LatLng(34.1 + i, 108.3 + i));
             mInfos.add(e);
-        }
+        }*/
         return mInfos;
     }
 
@@ -154,5 +158,27 @@ public class MainViewModel extends BaseModel {
 
     public int getScreenHeight() {
         return mScreenHeight;
+    }
+
+    public void setDisplayFileName(String displayFileName) {
+        this.mDisplayFileName = displayFileName;
+    }
+
+    public String getDisplayFileName() {
+        return mDisplayFileName;
+    }
+
+    public List<InputValueInfo> getDisplayData() {
+        for (int i = 0; i < 20; i++) {
+            InputValueInfo e = new InputValueInfo();
+            e.setValue(12.2 + i);
+            e.setLatLng(new LatLng(34.1 + i, 108.3 + i));
+            mDisplayData.add(e);
+        }
+        return mDisplayData;
+    }
+
+    public void setDisplayData(List<InputValueInfo> mDisplayData) {
+        this.mDisplayData = mDisplayData;
     }
 }
