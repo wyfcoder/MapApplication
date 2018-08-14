@@ -15,7 +15,7 @@ import java.util.List;
 
 public interface IMainView extends IBaseView, IBaseViewModel{
     public void animateToLocation();
-    public void drawLoc(double latitude, double longitude, float radius);
+    public void drawLoc(double latitude, double longitude, float radius, double lastX);
 
     void drawHeatMap(List<LatLng> dataList);
 

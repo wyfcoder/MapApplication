@@ -7,5 +7,5 @@ import com.baidu.mapapi.model.LatLng;
  */
 
 public interface IntereactionForLocation {
-    void passLocation(LatLng latLng, double radius);
+    void passLocation(LatLng latLng, double radius, double lastX);
 }

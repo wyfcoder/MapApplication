@@ -35,12 +35,15 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.Gradient;
 import com.baidu.mapapi.map.HeatMap;
 import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
 import com.blankj.utilcode.util.TimeUtils;
@@ -49,7 +52,6 @@ import com.example.team.mapapplication.R;
 import com.example.team.mapapplication.base.BaseActivity;
 import com.example.team.mapapplication.base.BaseModel;
 import com.example.team.mapapplication.base.IBaseMethodInterface;
-import com.example.team.mapapplication.bean.DataDisplayInfo;
 import com.example.team.mapapplication.bean.InputValueInfo;
 import com.example.team.mapapplication.business.acquireinfo.AcquireModel;
 import com.example.team.mapapplication.business.background_functions.location.IntereactionForLocation;
@@ -70,7 +72,6 @@ import org.byteam.superadapter.SuperViewHolder;
 
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
@@ -89,8 +90,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     }
 
     @Override
-    public void drawLoc(double latitude, double longitude, float radius) {
-        MyLocationData data = new MyLocationData.Builder().accuracy(radius).direction(100).latitude(latitude).longitude(longitude).build();
+    public void drawLoc(double latitude, double longitude, float radius, double lastX) {
+        MyLocationData data = new MyLocationData.Builder().accuracy(radius).latitude(latitude).longitude(longitude).direction((float) lastX).build();
         mBaiduMap.setMyLocationData(data);
         Log.d("MyLocData", data.latitude + " \n" + data.longitude);
 
@@ -386,10 +387,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
             mLocationService = ((LocationService.ServiceBinder) service).getService();
             mLocationService.setLocationInterface(new IntereactionForLocation() {
                 @Override
-                public void passLocation(LatLng latLng, double radius) {
+                public void passLocation(LatLng latLng, double radius, double lastX) {
                     mModel.setLatLng(latLng);
                     mModel.setRadius((float) radius);
-
+                    mModel.setLastX(lastX);
                     mPresenter.setLocationData();
 
                     if (isFirstLoc){
@@ -713,6 +714,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         mMapView = findViewById(R.id.main_mv);
         mBaiduMap = mMapView.getMap();
         mBaiduMap.setMyLocationEnabled(true);
+
+        BitmapDescriptor currentMarker = BitmapDescriptorFactory.fromResource(R.drawable.position);
+        MyLocationConfiguration configuration = new MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, true, currentMarker);
+        mBaiduMap.setMyLocationConfiguration(configuration);
     }
 
     private LocationClientOption createLocationOption() {

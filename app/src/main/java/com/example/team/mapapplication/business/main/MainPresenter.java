@@ -62,7 +62,8 @@ public class MainPresenter extends BasePresenter<IMainView> {
     public void setLocationData() {
         LatLng latLng = mModel.getLatLng();
         float radius = mModel.getRadius();
-        mView.drawLoc(latLng.latitude, latLng.longitude, radius);
+        double lastX = mModel.getLastX();
+        mView.drawLoc(latLng.latitude, latLng.longitude, radius, lastX);
     }
 
     public void drawHeatMap() {

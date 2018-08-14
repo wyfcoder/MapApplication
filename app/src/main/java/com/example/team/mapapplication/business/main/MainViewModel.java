@@ -45,6 +45,7 @@ public class MainViewModel extends BaseModel {
     private List<InputValueInfo> mDisplayData = new ArrayList<>();
     private boolean mPickStarted;
     private long mSavedTimeMills;
+    private double mLastX;
 
     public void setLatLng(LatLng latLng){
         mLocInfo = latLng;
@@ -274,5 +275,13 @@ public class MainViewModel extends BaseModel {
             }
         }*/
         return permissions;
+    }
+
+    public void setLastX(double lastX) {
+        this.mLastX = lastX;
+    }
+
+    public double getLastX() {
+        return mLastX;
     }
 }

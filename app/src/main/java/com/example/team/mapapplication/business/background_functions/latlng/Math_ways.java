@@ -1,5 +1,10 @@
 package com.example.team.mapapplication.business.background_functions.latlng;
-public class Math_ways {
+
+import android.content.Context;
+import android.content.SharedPreferences;
+
+public class Math_ways
+{
     /** 长半径a=6378137 */
     private static double a= 6378137;
     /** 短半径b=6356752.3142 */
@@ -48,14 +53,18 @@ public class Math_ways {
         return jw;
     }
 
-    //由步长确定距离，估计值为0.5米一步
-   public static double stepToDistance(double step)
+    //由步长确定距离
+   public static double stepToDistance(double step, Context context)
     {
-        return step*0.5;
+        //打开用户的信息，性别与身高
+        SharedPreferences sharedPreferences=context.getSharedPreferences("userInformation",Context.MODE_PRIVATE);
+        float length=sharedPreferences.getFloat("length",(float)0.6);
+        return step*length;
     }
 
     //由两点的经纬度确定两点的距离
-    public static  double translateToDistance(JingWei jw1,JingWei jw2) {
+    public static  double translateToDistance(JingWei jw1,JingWei jw2)
+    {
         double Lat1 = rad(jw1.latitude_value); // 纬度
 
         double Lat2 = rad(jw2.latitude_value);
@@ -111,6 +120,9 @@ public class Math_ways {
 
     public static double ConvertDegreesToRadians(double degrees)
     {
-        return degrees * Math.PI / 180;}
+        return degrees * Math.PI / 180;
+    }
+
+
 }
 

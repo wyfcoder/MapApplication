@@ -153,7 +153,7 @@ public class LocationService extends Service {
 //            locationClient.stop();  // OK here is where all happens. I mute it and the notification stop flashing. wyy
 
             if (mLocationInterface != null){
-                mLocationInterface.passLocation(new LatLng(latitude_value, longitude_value), accurate);
+                mLocationInterface.passLocation(new LatLng(latitude_value, longitude_value), accurate, lastX);
             }
 
 //            sendBroadcast();  No need to communicate with the original "Main Activity". wyy
