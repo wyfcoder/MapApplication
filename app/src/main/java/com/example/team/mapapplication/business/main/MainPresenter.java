@@ -1,17 +1,33 @@
 package com.example.team.mapapplication.business.main;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 
 import com.baidu.mapapi.model.LatLng;
+import com.blankj.utilcode.constant.PermissionConstants;
+import com.blankj.utilcode.util.PermissionUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.example.team.mapapplication.base.BasePresenter;
+import com.example.team.mapapplication.base.IBaseMethodInterface;
+import com.example.team.mapapplication.bean.InputValueInfo;
+import com.example.team.mapapplication.business.acquireinfo.AcquireModel;
+import com.example.team.mapapplication.business.background_functions.signal.SaveDataService;
 import com.example.team.mapapplication.engine.RepeatHandler;
 import com.example.team.mapapplication.engine.LocateFinishHandler;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import static com.example.team.mapapplication.business.main.MainViewModel.WIFI_MODE;
 
 
 public class MainPresenter extends BasePresenter<IMainView> {
@@ -19,6 +35,8 @@ public class MainPresenter extends BasePresenter<IMainView> {
     private MainViewModel mModel;
     private RepeatHandler mHandler;
     private LocateFinishHandler mLocateFinishedHandler;
+
+    private RepeatHandler mGetStrengthHandler;
 
     //for test
     private LocateFinishHandler mRepeatingLocationRequiringHandler;
@@ -132,6 +150,7 @@ public class MainPresenter extends BasePresenter<IMainView> {
         }
     }
 
+    @Deprecated
     private void initRequiringHandlerIfNeed() {
         Runnable saveInfoRunnable = new Runnable() {
             @Override
@@ -140,7 +159,6 @@ public class MainPresenter extends BasePresenter<IMainView> {
                 mView.drawMarkerOverlay(mModel.getLatLng(), "10"); //暂时弃用了
                 mView.refreshInfoList();
                 mView.notifyWaitFinished();
-                startPick();
                 ToastUtils.showShort("定位结束开始下一次定位");
             }
         };
@@ -172,13 +190,15 @@ public class MainPresenter extends BasePresenter<IMainView> {
     }
 
     public void transferToWifiMode() {
-        mModel.setModeStatus(MainViewModel.WIFI_MODE);
+        bindSignalServiceIfNeeded();
+        mModel.setModeStatus(WIFI_MODE);
         mView.transferToWifiModeView();
         mModel.getInputValueInfos().clear();
         refreshInfoList();
     }
 
     public void transferToEditMode() {
+//        unBindSignalServiceIfNeeded(); //in case of unexpected crash triggered by frequently switching signal service. wyy
         mModel.setModeStatus(MainViewModel.EDIT_MODE);
         mView.transferToEditModeView();
         mModel.getInputValueInfos().clear();
@@ -192,9 +212,65 @@ public class MainPresenter extends BasePresenter<IMainView> {
         mView.transferToDisplayModeView();
     }
 
-    public void startPick() {
-        mView.startLocate();
-        mView.notifyWaitStart();
+
+    private SaveDataService mSaveDataService;
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mSaveDataService = ((SaveDataService.SignalServiceBinder) service).getService();
+            ToastUtils.showShort("Service Connected");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mSaveDataService = null;
+        }
+    };
+
+
+
+    public void selectWifi() {
+        List<String> names = mSaveDataService.getWifiNames();
+        mView.selectWifi(names);
+    }
+
+    public void startPick(final CharSequence selectedSignalName) {
+//        mView.startLocate();
+//        mView.notifyWaitStart();
+
+        mModel.setPickStarted(true);
+
+        Runnable getStrengthRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (mSaveDataService != null){
+                    int strength = mSaveDataService.getStrength((String) selectedSignalName);
+                    ToastUtils.showShort("Strength: " + strength);
+                    saveInfo(strength + "");
+                }else {
+                    Log.d("Signal", "Service Unprepared");
+                }
+            }
+        };
+        mGetStrengthHandler = new RepeatHandler(getStrengthRunnable);
+        mGetStrengthHandler.setRepeatOn(true);
+        mGetStrengthHandler.setDelay(3000);
+        mGetStrengthHandler.setMessageMark(201);
+        mGetStrengthHandler.start();
+    }
+
+
+    public void bindSignalServiceIfNeeded() {
+        if (mSaveDataService == null){
+            mContext.bindService(new Intent(mContext, SaveDataService.class), mConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+
+    public void unBindSignalServiceIfNeeded() {
+        if (mSaveDataService != null){
+            mContext.unbindService(mConnection);
+        }
     }
 
     /**
@@ -213,5 +289,75 @@ public class MainPresenter extends BasePresenter<IMainView> {
         mModel.saveDisplayToDB(text);
         ToastUtils.showShort("存储完成");
         return 0;
+    }
+
+    /**
+     * set to unbind service when pick's end.
+     * now deprecated.
+     */
+    @Deprecated
+    public void endPick() {
+        unBindSignalServiceIfNeeded();
+    }
+
+    /**
+     * it starts in edit mode so the only needed is to determine whether it's in Wifi mode. wyy
+     * @param state saved mode status.
+     */
+    public void switchMode(int state) {
+        if (state == WIFI_MODE){
+            transferToWifiMode();
+        }
+    }
+
+    /**
+     * restore data list when app re-launched. wyy
+     * @param infos saved data list.
+     */
+    public void restoreDataList(List<InputValueInfo> infos) {
+        mModel.getInputValueInfos().addAll(infos);
+    }
+
+    @Deprecated
+    public void askIfNeedToSave(IBaseMethodInterface iBaseMethodInterface) {
+        mView.showMessageDialog("是否", iBaseMethodInterface);
+    }
+
+    public void dealSavedInstance(Bundle savedInstanceState) {
+        if (savedInstanceState != null){ // seems unnecessary though. -.- wyy
+            int state = savedInstanceState.getInt("state", -1);
+            List<InputValueInfo> infos = savedInstanceState.getParcelableArrayList("data_list");
+            switchMode(state);
+            restoreDataList(infos);
+        }
+    }
+
+    public static void askForPermissions() {
+
+
+        String[] needGrantPermissions = {PermissionConstants.LOCATION, PermissionConstants.STORAGE, PermissionConstants.SENSORS, PermissionConstants.PHONE};
+
+
+        if (needGrantPermissions.length > 0) {
+            PermissionUtils p = PermissionUtils.permission(needGrantPermissions).callback(new PermissionUtils.SimpleCallback() {
+                @Override
+                public void onGranted() {
+                }
+
+                @Override
+                public void onDenied() {
+                    ToastUtils.showShort("可以在手机设置内手动授予权限");
+                }
+            });
+            p.request();
+        }
+    }
+
+    public void saveGender(String text) {
+        AcquireModel.saveGender(text);
+    }
+
+    public void saveHeight(String s) {
+        AcquireModel.saveHeight(s);
     }
 }

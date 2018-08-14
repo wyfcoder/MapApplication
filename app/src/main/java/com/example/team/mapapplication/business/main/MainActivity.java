@@ -2,11 +2,14 @@ package com.example.team.mapapplication.business.main;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -25,6 +28,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.Theme;
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
@@ -38,18 +43,22 @@ import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.blankj.utilcode.util.TimeUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.example.team.mapapplication.R;
 import com.example.team.mapapplication.base.BaseActivity;
 import com.example.team.mapapplication.base.BaseModel;
+import com.example.team.mapapplication.base.IBaseMethodInterface;
 import com.example.team.mapapplication.bean.DataDisplayInfo;
 import com.example.team.mapapplication.bean.InputValueInfo;
+import com.example.team.mapapplication.business.acquireinfo.AcquireModel;
 import com.example.team.mapapplication.business.background_functions.location.IntereactionForLocation;
 import com.example.team.mapapplication.business.background_functions.location.LocationService;
 import com.example.team.mapapplication.business.retrieve.RetrieveActivity;
 import com.example.team.mapapplication.engine.QMUIEditTextDialogGenerator;
 import com.example.team.mapapplication.engine.ViewLocationHelper;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+import com.qmuiteam.qmui.widget.dialog.QMUIBottomSheet;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.qmuiteam.qmui.widget.popup.QMUIPopup;
@@ -60,6 +69,7 @@ import org.byteam.superadapter.SuperAdapter;
 import org.byteam.superadapter.SuperViewHolder;
 
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -242,6 +252,61 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     }
 
     @Override
+    public void selectWifi(List<String> names) {
+
+        // the first choice is 4G.
+        // the last one is the selected (I cannot assign a value to a final variable -. -). wyy
+        final int namesSize = names.size() + 1;
+        final CharSequence[] namesCS = new CharSequence[namesSize];
+        namesCS[0] = "4G";
+        for (int i = 0; i < names.size(); i++){
+            namesCS[i + 1] = names.get(i);
+        }
+
+        final CharSequence[] selectedWifiContainer = new CharSequence[1];
+
+        QMUIDialog.MenuDialogBuilder builder = new QMUIDialog.MenuDialogBuilder(this);
+        builder.setTitle("请选择Wifi")
+                .addItems(namesCS, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        selectedWifiContainer[0] = namesCS[which];
+                        if ("4G".equals(selectedWifiContainer[0])){
+                            selectedWifiContainer[0] = "";
+                        }
+                        mPresenter.startPick(selectedWifiContainer[0]);
+                        dialog.dismiss();
+                    }
+                });
+        builder.create().show();
+    }
+
+    @Override
+    public void performSaveBtnCalled() {
+        mSaveBtn.performClick();
+    }
+
+    @Override
+    public void showMessageDialog(String s, final IBaseMethodInterface iBaseMethodInterface) {
+        QMUIDialog.MessageDialogBuilder builder = new QMUIDialog.MessageDialogBuilder(this);
+        builder.setTitle(s);
+        builder.addAction("取消", new QMUIDialogAction.ActionListener() {
+            @Override
+            public void onClick(QMUIDialog dialog, int index) {
+                dialog.dismiss();
+            }
+        }).addAction("确定", new QMUIDialogAction.ActionListener() {
+            @Override
+            public void onClick(QMUIDialog dialog, int index) {
+                if (iBaseMethodInterface != null){
+                    iBaseMethodInterface.doMethod();
+                }
+                dialog.dismiss();
+            }
+        }).create().show();
+    }
+
+    @Override
     public void transferToWifiModeView() {
         mToolbar.setSubtitle("信号模式");
         hideEditViews();
@@ -283,6 +348,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     }
 
 
+    @Deprecated
     public class MyLocationListener extends BDAbstractLocationListener{
 
         @Override
@@ -363,11 +429,13 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     private SuperAdapter<InputValueInfo> mAdapter;
     private BaiduMap mBaiduMap;
     private HeatMap mHeatMap;
+
+    private boolean isFirstLoc = true;
+    private MainViewModel mModel = new MainViewModel();
+
+    @Deprecated
     private LocationClient mLocationClient;
     private MyLocationListener mListener = new MyLocationListener();
-    private boolean isFirstLoc = true;
-
-    private MainViewModel mModel = new MainViewModel();
 
 
     @Override
@@ -392,10 +460,21 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("state", mModel.getModeStatus());
+        outState.putParcelableArrayList("data_list",  (ArrayList<? extends Parcelable>) mModel.getInputValueInfos());
+    }
+
+
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mPresenter.attach(this);
+
+        mPresenter.askForPermissions();
 
         mModel.setScreenHeight(getResources().getDisplayMetrics().heightPixels);
 
@@ -420,7 +499,11 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
         bindService(new Intent(this, LocationService.class), mConnection, BIND_AUTO_CREATE);
         startService(new Intent(this, LocationService.class));
+
+        mPresenter.dealSavedInstance(savedInstanceState);
+
     }
+
 
     private void initiallyHideWifiViews() {
         int spBtnY = ViewLocationHelper.getAbsoluteLocationOnScreen(mStartPickBtn)[1]; //使用getY()获得的是相对于父控件的坐标，这里直接用屏幕绝对坐标统一
@@ -516,10 +599,31 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         });
 
 
+        mEndPickBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mModel.isPickStarted()){
+                    ToastUtils.showShort("还未开始获取");
+                    return;
+                }
+                QMUIDialog dialog = new QMUIEditTextDialogGenerator(getContext(), "输入文件名"){
+
+                    @Override
+                    protected void onPositiveClick(QMUIDialog dialog, int index, String text) {
+                        int state = mPresenter.saveValuesToDB(text);
+                        if (state == 0){
+                            dialog.dismiss();
+                        }
+                    }
+                }.getDialog();
+                dialog.show();
+            }
+        });
+
         mStartPickBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mPresenter.startPick();
+                mPresenter.selectWifi();
             }
         });
 
@@ -619,6 +723,22 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     }
 
     @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(Gravity.LEFT)){
+            mDrawerLayout.closeDrawer(Gravity.LEFT);
+        }else {
+            long nowMills = TimeUtils.getNowMills();
+            if (nowMills - mModel.getSavedTimeMills() > 2000){
+                mModel.setSavedTimeMills(nowMills);
+                ToastUtils.showShort("再按一次退出");
+            }else {
+                super.onBackPressed();
+            }
+        }
+
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (mModel.getModeStatus() != MainViewModel.DISPLAY_MODE){
             getMenuInflater().inflate(R.menu.input_topbar_menu, menu);
@@ -642,14 +762,76 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
             case R.id.menu_item_data:
                 startActivity(new Intent(this, RetrieveActivity.class));
                 break;
+            case R.id.menu_item_body_info:
+                showBottomSheet();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showBottomSheet() {
+        QMUIBottomSheet.BottomListSheetBuilder builder = new QMUIBottomSheet.BottomListSheetBuilder(this);
+        builder.setOnSheetItemClickListener(new QMUIBottomSheet.BottomListSheetBuilder.OnSheetItemClickListener() {
+            @Override
+            public void onClick(QMUIBottomSheet dialog, View itemView, int position, String tag) {
+                if ("gender".equals(tag)){
+
+                    int index = -1;
+                    String savedGender = AcquireModel.getGender();
+                    if (!"".equals(savedGender)){
+                        if ("男".equals(savedGender)){
+                            index = 0;
+                        }else {
+                            index = 1;
+                        }
+                    }
+
+                    MaterialDialog itemDialog = new MaterialDialog.Builder(getContext())
+                            .title("请选择性别")
+                            .theme(Theme.LIGHT)
+                            .items("男", "女")
+                            .itemsCallbackSingleChoice(index, new MaterialDialog.ListCallbackSingleChoice() {
+                                @Override
+                                public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+                                    mPresenter.saveGender((String) text);
+                                    dialog.dismiss();
+                                    return true;
+                                }
+                            })
+                            .positiveText("确定")
+                            .show();
+                }
+                if ("height".equals(tag)){
+                    MaterialDialog itemDialog = new MaterialDialog.Builder(getContext())
+                            .title("请填写身高")
+                            .theme(Theme.LIGHT)
+                            .content("/厘米")
+                            .inputType(InputType.TYPE_CLASS_NUMBER)
+                            .inputRange(2, 3)
+                            .input("身高", (int)AcquireModel.getHeight() + "" , new MaterialDialog.InputCallback() {
+                                @Override
+                                public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+                                    mPresenter.saveHeight(String.valueOf(input));
+                                    dialog.dismiss();
+                                }
+                            }).show();
+                }
+                dialog.dismiss();
+            }
+        });
+        builder.addItem("身高", "height").addItem("性别", "gender");
+
+        builder.build().show();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mMapView.onDestroy();
+
+        mPresenter.unBindSignalServiceIfNeeded();
+
+        // unbind location service if needed. wyy
         if (mModel.getModeStatus() != MainViewModel.DISPLAY_MODE){
             if (mConnection != null){
                 unbindService(mConnection);

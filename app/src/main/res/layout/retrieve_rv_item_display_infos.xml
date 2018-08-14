@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp">
+    android:padding="10dp"
+    android:background="@color/qmui_config_color_white">
     <TextView
         android:text="file name"
         android:textColor="@color/qmui_btn_blue_text"
-        android:textSize="23sp"
+        android:textSize="20sp"
         android:layout_centerHorizontal="true"
         android:id="@+id/retrieve_rv_item_tv_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <TextView
         android:text="file time"
-        android:textColor="@color/qmui_btn_blue_text"
-        android:textSize="18sp"
+        android:textColor="@color/qmui_config_color_black"
+        android:textSize="15sp"
         android:id="@+id/retrieve_rv_item_tv_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
         android:layout_below="@id/retrieve_rv_item_tv_name"/>
 
 </RelativeLayout>

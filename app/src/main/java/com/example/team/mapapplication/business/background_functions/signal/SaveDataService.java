@@ -7,15 +7,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Binder;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
+import android.view.LayoutInflater;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import com.example.team.mapapplication.database.informationDatabaseOperate;
 
@@ -47,6 +51,13 @@ public class SaveDataService extends Service
 
    private int  signal_values;
 
+    public class SignalServiceBinder extends Binder{
+        public SaveDataService getService(){
+            return SaveDataService.this;
+        }
+    }
+
+    private SignalServiceBinder mBinder = new SignalServiceBinder();
 
     public SaveDataService()
     {
@@ -56,7 +67,7 @@ public class SaveDataService extends Service
 
     public IBinder onBind(Intent intent)
     {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return mBinder;
     }
 
     public void onCreate()
@@ -165,13 +176,35 @@ public class SaveDataService extends Service
     }
 
 
+    /**
+     * to get signal strength from outside
+     * @param targetWifiName wifi name. "" means 4G.
+     * @return strength
+     * wyy
+     */
+    public int getStrength(String targetWifiName){
+        wifi_name = targetWifiName;
+        if (!"".equals(targetWifiName)){
+            signal_values = getWifiStrength();
+        }
+        return signal_values;
+    }
+
+    public List<String> getWifiNames(){
+        List<ScanResult> results = wifiManager.getScanResults();
+        List<String> wifiNames = new ArrayList<>();
+        for (ScanResult r : results){
+            wifiNames.add(r.SSID);
+        }
+        return wifiNames;
+    }
 
     //wifi信号值的获取
     private int getWifiStrength() {
         List<ScanResult> results = wifiManager.getScanResults();
         for(int i=0;i<results.size();i++)
         {
-            if(results.get(i).SSID==wifi_name)
+            if(Objects.equals(results.get(i).SSID, wifi_name))
             {
                 int level=results.get(i).level;
                 return (level+113)/2;

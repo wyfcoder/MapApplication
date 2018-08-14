@@ -56,21 +56,31 @@
         <service
             android:name=".business.background_functions.location.LocationService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="false" />
+        <service
+            android:name=".business.background_functions.signal.SaveDataService"
+            android:enabled="true"
+            android:exported="false" />
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="kZd76uh6x8jBirG85YZo8RwCEtHdIvsa" />
 
-        <activity android:name=".business.main.MainActivity">
+        <activity android:name=".business.main.MainActivity"></activity>
+        <activity android:name=".business.retrieve.RetrieveActivity" />
+        <activity
+            android:name=".business.welcome.MyWelcomeActivity"
+            android:theme="@style/WelcomeScreenTheme">
+
+        </activity>
+        <activity android:name=".engine.StartActivity"
+            android:theme="@style/StartTransparentTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".business.choose.ChooseActivity" />
-        <activity android:name=".business.retrieve.RetrieveActivity"></activity>
     </application>
 
 </manifest>

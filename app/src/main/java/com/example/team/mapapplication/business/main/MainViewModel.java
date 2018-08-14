@@ -3,9 +3,10 @@ package com.example.team.mapapplication.business.main;
 import android.util.Log;
 
 import com.baidu.mapapi.model.LatLng;
+import com.blankj.utilcode.constant.PermissionConstants;
+import com.blankj.utilcode.util.PermissionUtils;
 import com.blankj.utilcode.util.SPUtils;
 import com.blankj.utilcode.util.TimeUtils;
-import com.blankj.utilcode.util.ToastUtils;
 import com.example.team.mapapplication.base.BaseModel;
 import com.example.team.mapapplication.bean.DataDisplayInfo;
 import com.example.team.mapapplication.bean.InputValueInfo;
@@ -42,6 +43,8 @@ public class MainViewModel extends BaseModel {
     private int mScreenHeight;
     private String mDisplayFileName;
     private List<InputValueInfo> mDisplayData = new ArrayList<>();
+    private boolean mPickStarted;
+    private long mSavedTimeMills;
 
     public void setLatLng(LatLng latLng){
         mLocInfo = latLng;
@@ -112,7 +115,7 @@ public class MainViewModel extends BaseModel {
             double latitude = latLng.latitude;
             double longitude = latLng.longitude;
             for (int j = 0; j < repeatNum; j++){
-                data.add(new LatLng(latitude + r.nextDouble() * 10, longitude + r.nextDouble() * 10));
+                data.add(new LatLng(latitude, longitude));
             }
         }
         return data;
@@ -173,6 +176,10 @@ public class MainViewModel extends BaseModel {
         return mDisplayFileName;
     }
 
+    /**
+     * get data for display mode. wyy
+     * @return data to display
+     */
     public List<InputValueInfo> getDisplayData() {
         /* mocking data
         for (int i = 0; i < 20; i++) {
@@ -218,9 +225,13 @@ public class MainViewModel extends BaseModel {
     public void saveDisplayToDB(String text) {
         // save the saving behavior as another table. wyy
 
+        Calendar calendar = Calendar.getInstance();
         DataDisplayInfo di = new DataDisplayInfo();
         di.setFileName(text);
-        di.setCalendar(Calendar.getInstance());
+        di.setCalendar(calendar);
+        di.setYear(calendar.get(Calendar.YEAR));
+        di.setMonth(calendar.get(Calendar.MONTH ) + 1);
+        di.setDay(calendar.get(Calendar.DAY_OF_MONTH));
 
         List<DataDisplayInfo> preData = LitePal.where("mFileName = ?", text).find(DataDisplayInfo.class);
 
@@ -230,5 +241,38 @@ public class MainViewModel extends BaseModel {
         }else {
             di.updateAll("mFileName = ?", text);
         }
+    }
+
+
+    public void setPickStarted(boolean pickStarted) {
+        this.mPickStarted = pickStarted;
+    }
+
+    public boolean isPickStarted() {
+        return mPickStarted;
+    }
+
+    public long getSavedTimeMills() {
+        return mSavedTimeMills;
+    }
+
+    public void setSavedTimeMills(long savedTimeMills) {
+        this.mSavedTimeMills = savedTimeMills;
+    }
+
+    @Deprecated
+    public String[] getNeedPermissions() {
+        String[] permissions = {PermissionConstants.LOCATION, PermissionConstants.STORAGE, PermissionConstants.SENSORS, PermissionConstants.PHONE};
+        /*boolean[] grants = new boolean[permissions.length];
+        for (int i = 0; i < grants.length; i++){
+            grants[i] = PermissionUtils.isGranted(permissions[i]);
+        }
+        List<String> needGrantPermissions = new ArrayList<>();
+        for (int i = 0; i < permissions.length; i++){
+            if (!grants[i]){
+                needGrantPermissions.add(permissions[i]);
+            }
+        }*/
+        return permissions;
     }
 }

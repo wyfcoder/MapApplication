@@ -42,4 +42,7 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.jaeger.statusbarutil:library:1.4.0'
     implementation 'org.litepal.android:core:2.0.0'
+    implementation 'com.dinuscxj:recycleritemdecoration:1.0.0'
+    implementation 'com.stephentuso:welcome:1.4.1'
+    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
 }

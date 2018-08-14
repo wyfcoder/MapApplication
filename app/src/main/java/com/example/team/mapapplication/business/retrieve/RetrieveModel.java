@@ -2,6 +2,9 @@ package com.example.team.mapapplication.business.retrieve;
 
 import com.example.team.mapapplication.base.BaseModel;
 import com.example.team.mapapplication.bean.DataDisplayInfo;
+import com.example.team.mapapplication.bean.InputValueInfo;
+
+import org.litepal.LitePal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +22,17 @@ public class RetrieveModel extends BaseModel {
      * @return data list
      */
     public List<DataDisplayInfo> getDisplayInfos() {
-        for (int i = 0; i < 25; i++){
-            displayInfos.add(new DataDisplayInfo());
-        }
+
+        displayInfos = LitePal.findAll(DataDisplayInfo.class);
+
         return displayInfos;
+    }
+
+    public void deleteThisDataList(String fileName) {
+        LitePal.deleteAll(InputValueInfo.class, "fileName = ?", fileName);
+    }
+
+    public void deleteThisDisplayInfo(String fileName) {
+        LitePal.deleteAll(DataDisplayInfo.class, "mFileName = ?", fileName);
     }
 }

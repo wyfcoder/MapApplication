@@ -8,4 +8,5 @@ import com.example.team.mapapplication.base.IBaseViewModel;
  */
 
 public interface IRetrieveView extends IBaseView, IBaseViewModel{
+    void notifyDataSetChanged();
 }

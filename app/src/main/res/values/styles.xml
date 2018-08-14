@@ -8,4 +8,7 @@
         <item name="colorAccent">@color/sky_blue</item>
     </style>
 
+    <style name="WelcomeScreenTheme.BIFragTheme" parent="QMUI.Compat.NoActionBar"/>
+
+    <style name="StartTransparentTheme" parent="android:Theme.Translucent.NoTitleBar.Fullscreen"/>
 </resources>

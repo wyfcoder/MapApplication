@@ -19,6 +19,15 @@ public class RetrievePresenter extends BasePresenter<IRetrieveView> {
     }
 
     public void requireData() {
-        mViewModel.setDisplayInfos(mModel.getDisplayInfos());
+        mViewModel.getDisplayInfos().clear();
+
+        mViewModel.getDisplayInfos().addAll(mModel.getDisplayInfos());
+    }
+
+    public void deleteThisTable(String fileName) {
+        mModel.deleteThisDataList(fileName);
+        mModel.deleteThisDisplayInfo(fileName);
+        requireData();
+        mView.notifyDataSetChanged();
     }
 }

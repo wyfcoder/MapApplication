@@ -9,6 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.SizeUtils;
+import com.dinuscxj.itemdecoration.GridOffsetsItemDecoration;
 import com.example.team.mapapplication.R;
 import com.example.team.mapapplication.base.BaseActivity;
 import com.example.team.mapapplication.base.BaseModel;
@@ -19,6 +21,7 @@ import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialogBuilder;
 
 import org.byteam.superadapter.OnItemClickListener;
+import org.byteam.superadapter.OnItemLongClickListener;
 import org.byteam.superadapter.SuperAdapter;
 import org.byteam.superadapter.SuperViewHolder;
 
@@ -31,6 +34,21 @@ public class RetrieveActivity extends BaseActivity<RetrievePresenter> implements
     private RetrieveViewModel mModel = new RetrieveViewModel();
 
     private SuperAdapter<DataDisplayInfo> mAdapter;
+
+    @Override
+    protected CharSequence getToolbarTitle() {
+        return "保存的数据";
+    }
+
+    @Override
+    protected void onHomeIndicatorClicked() {
+        finish();
+    }
+
+    @Override
+    protected int getDrawerIcon() {
+        return R.drawable.qmui_icon_topbar_back;
+    }
 
     @Override
     protected RetrievePresenter createPresenter() {
@@ -65,8 +83,7 @@ public class RetrieveActivity extends BaseActivity<RetrievePresenter> implements
 
                 name.setText(item.getFileName());
 
-                Calendar calendar = item.getCalendar();
-                time.setText(calendar.get(Calendar.YEAR) + ": " + calendar.get(Calendar.MONTH) + ": " + calendar.get(Calendar.DAY_OF_MONTH));
+                time.setText(item.getYear() + " - " + item.getMonth() + " - " + item.getDay());
             }
         };
 
@@ -95,6 +112,35 @@ public class RetrieveActivity extends BaseActivity<RetrievePresenter> implements
             }
         });
 
+        mAdapter.setOnItemLongClickListener(new OnItemLongClickListener() {
+            @Override
+            public void onItemLongClick(View itemView, int viewType, final int position) {
+                QMUIDialog.MessageDialogBuilder builder = new QMUIDialog.MessageDialogBuilder(getContext());
+                builder.setMessage("确定要删除吗")
+                        .addAction("取消", new QMUIDialogAction.ActionListener() {
+                            @Override
+                            public void onClick(QMUIDialog dialog, int index) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .addAction("确定", new QMUIDialogAction.ActionListener() {
+                            @Override
+                            public void onClick(QMUIDialog dialog, int index) {
+                                mPresenter.deleteThisTable(mModel.getDisplayInfos().get(position).getFileName());
+                                dialog.dismiss();
+                            }
+                        });
+                builder.create().show();
+            }
+        });
+
+        GridOffsetsItemDecoration goid = new GridOffsetsItemDecoration(GridOffsetsItemDecoration.GRID_OFFSETS_VERTICAL);
+
+        goid.setHorizontalItemOffsets(SizeUtils.dp2px(5));
+        goid.setVerticalItemOffsets(SizeUtils.dp2px(5));
+
+        mReView.addItemDecoration(goid);
+
         mReView.setLayoutManager(new GridLayoutManager(this, 2));
 
         mReView.setAdapter(mAdapter);
@@ -114,5 +160,10 @@ public class RetrieveActivity extends BaseActivity<RetrievePresenter> implements
     @Override
     public BaseModel getModel() {
         return mModel;
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        mAdapter.notifyDataSetChanged();
     }
 }

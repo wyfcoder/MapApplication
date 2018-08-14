@@ -38,9 +38,13 @@ public abstract class BaseActivity<V extends BasePresenter> extends AppCompatAct
             ActionBar actionBar = getSupportActionBar();
             actionBar.setTitle(getToolbarTitle());
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(ContextCompat.getDrawable(this, R.drawable.ic_drawer_actionbar));
+            actionBar.setHomeAsUpIndicator(ContextCompat.getDrawable(this, getDrawerIcon()));
             actionBar.setSubtitle(getSubTitle());
         }
+    }
+
+    protected int getDrawerIcon() {
+        return R.drawable.ic_drawer_actionbar;
     }
 
     protected CharSequence getSubTitle() {

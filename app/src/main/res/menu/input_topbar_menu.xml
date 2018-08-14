@@ -4,16 +4,20 @@
         <item
             app:showAsAction="never"
             android:id="@+id/menu_item_edit_mode"
-            android:title="edit mode" />
+            android:title="编辑模式" />
         <item
             app:showAsAction="never"
             android:id="@+id/menu_item_wifi_mode"
-            android:title="wifi mode"/>
+            android:title="信号模式"/>
         <item
             app:showAsAction="never"
             android:id="@+id/menu_item_data"
-            android:title="saved data"/>
-
+            android:title="已保存数据"/>
+        <item
+            app:showAsAction="always"
+            android:id="@+id/menu_item_body_info"
+            android:icon="@drawable/ic_body_info_menu"
+            android:title="填写信息" />
 
 
 </menu>
