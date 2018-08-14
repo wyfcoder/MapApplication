@@ -94,7 +94,6 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         MyLocationData data = new MyLocationData.Builder().accuracy(radius).latitude(latitude).longitude(longitude).direction((float) lastX).build();
         mBaiduMap.setMyLocationData(data);
         Log.d("MyLocData", data.latitude + " \n" + data.longitude);
-
     }
 
     @Override
@@ -475,7 +474,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
         mPresenter.attach(this);
 
-        mPresenter.askForPermissions();
+        mPresenter.askForPermissions(); // maintain it for code unification. -.- wyy
 
         mModel.setScreenHeight(getResources().getDisplayMetrics().heightPixels);
 
@@ -579,6 +578,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         mReView.setAdapter(mAdapter);
     }
 
+    @Deprecated
     private void initLocationClient() {
         mLocationClient = new LocationClient(getApplicationContext());
         mLocationClient.setLocOption(createLocationOption());
@@ -613,6 +613,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
                     protected void onPositiveClick(QMUIDialog dialog, int index, String text) {
                         int state = mPresenter.saveValuesToDB(text);
                         if (state == 0){
+                            mPresenter.stopPick();
                             dialog.dismiss();
                         }
                     }
@@ -715,7 +716,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         mBaiduMap = mMapView.getMap();
         mBaiduMap.setMyLocationEnabled(true);
 
-        BitmapDescriptor currentMarker = BitmapDescriptorFactory.fromResource(R.drawable.position);
+        BitmapDescriptor currentMarker = BitmapDescriptorFactory.fromResource(R.drawable.position); // too ugly. I have to replace it with a fancy pointer icon. wyy
         MyLocationConfiguration configuration = new MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, true, currentMarker);
         mBaiduMap.setMyLocationConfiguration(configuration);
     }

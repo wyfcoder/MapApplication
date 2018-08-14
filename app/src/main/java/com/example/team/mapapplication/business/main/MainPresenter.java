@@ -361,4 +361,10 @@ public class MainPresenter extends BasePresenter<IMainView> {
     public void saveHeight(String s) {
         AcquireModel.saveHeight(s);
     }
+
+    public void stopPick() {
+        if (mGetStrengthHandler != null){
+            mGetStrengthHandler.stop();
+        }
+    }
 }

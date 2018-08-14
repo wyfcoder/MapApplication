@@ -39,7 +39,9 @@ public class RepeatHandler extends Handler {
                 sendEmptyMessageDelayed(getMessageMark(), DELAY);//若只是画一次的话，只需把
             }
         }else if(!STOP_MARK){
-            post(mStopRunnable);
+            if (mStopRunnable != null){
+                post(mStopRunnable);
+            }
         }
     }
 
