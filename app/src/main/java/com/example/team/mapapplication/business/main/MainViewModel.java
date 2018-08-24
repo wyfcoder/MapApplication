@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.baidu.mapapi.model.LatLng;
 import com.blankj.utilcode.constant.PermissionConstants;
-import com.blankj.utilcode.util.PermissionUtils;
 import com.blankj.utilcode.util.SPUtils;
 import com.blankj.utilcode.util.TimeUtils;
 import com.example.team.mapapplication.base.BaseModel;
@@ -44,8 +43,10 @@ public class MainViewModel extends BaseModel {
     private String mDisplayFileName;
     private List<InputValueInfo> mDisplayData = new ArrayList<>();
     private boolean mPickStarted;
-    private long mSavedTimeMills;
-    private double mLastX;
+    private long mSavedTimeMills; // the time mills when the first click on back button takes place. wyy
+    private double mLastX; // seems the location accuracy circle. wyy
+    private int mMorphBtnHeight;
+    private int mMorphBtnWidth;
 
     public void setLatLng(LatLng latLng){
         mLocInfo = latLng;
@@ -206,10 +207,7 @@ public class MainViewModel extends BaseModel {
 
         List<InputValueInfo> data = getInputValueInfos();
 
-        List<InputValueInfo> preData = LitePal.where("fileName = ?", text).find(InputValueInfo.class);
-
-        // delete the previous same-named data and re-save the new ones.
-        if (preData != null && preData.size() > 0){
+        if (isThisNameUsed(text)){
             LitePal.deleteAll(InputValueInfo.class, "fileName = ?", text);
         }
         for (InputValueInfo d : data){
@@ -218,9 +216,17 @@ public class MainViewModel extends BaseModel {
             d.setLatitude(d.getLatLng().latitude);
             d.setLongitude(d.getLatLng().longitude);
             Log.d("Data Info", "Data Info: \n" + d.getFileName() + "\n" + d.getValue() + "\n" + d.getLatLng());
-            d.save();
+            boolean result = d.save();
+            Log.d("IS_SUCED", result + "   result");
         }
 
+    }
+
+    public boolean isThisNameUsed(String text) {
+        List<InputValueInfo> preData = LitePal.where("fileName = ?", text).find(InputValueInfo.class);
+
+        // delete the previous same-named data and re-save the new ones.
+        return preData != null && preData.size() > 0;
     }
 
     public void saveDisplayToDB(String text) {
@@ -283,5 +289,25 @@ public class MainViewModel extends BaseModel {
 
     public double getLastX() {
         return mLastX;
+    }
+
+    public void setMorphBtnHeight(int morphBtnHeight) {
+        this.mMorphBtnHeight = morphBtnHeight;
+    }
+
+    public int getmMorphBtnHeight() {
+        return mMorphBtnHeight;
+    }
+
+    public void setmMorphBtnHeight(int mMorphBtnHeight) {
+        this.mMorphBtnHeight = mMorphBtnHeight;
+    }
+
+    public void setMorphBtnWidth(int morphBtnWidth) {
+        this.mMorphBtnWidth = morphBtnWidth;
+    }
+
+    public int getMorphBtnWidth() {
+        return mMorphBtnWidth;
     }
 }

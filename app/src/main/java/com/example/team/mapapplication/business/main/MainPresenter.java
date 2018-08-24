@@ -32,6 +32,7 @@ import static com.example.team.mapapplication.business.main.MainViewModel.WIFI_M
 
 public class MainPresenter extends BasePresenter<IMainView> {
     private static final boolean LOCATE_DEBUG = true;
+    public static final int FILE_NAME_USED = -3;
     private MainViewModel mModel;
     private RepeatHandler mHandler;
     private LocateFinishHandler mLocateFinishedHandler;
@@ -40,6 +41,7 @@ public class MainPresenter extends BasePresenter<IMainView> {
 
     //for test
     private LocateFinishHandler mRepeatingLocationRequiringHandler;
+    private boolean mOverride = false;
 
     @Override
     public void attach(IMainView view) {
@@ -231,6 +233,10 @@ public class MainPresenter extends BasePresenter<IMainView> {
 
 
     public void selectWifi() {
+        if (mModel.isPickStarted()){
+            ToastUtils.showShort("已经开始收集信号");
+            return;
+        }
         List<String> names = mSaveDataService.getWifiNames();
         mView.selectWifi(names);
     }
@@ -239,6 +245,9 @@ public class MainPresenter extends BasePresenter<IMainView> {
 //        mView.startLocate();
 //        mView.notifyWaitStart();
 
+        mView.morphBtnToStartedState();
+
+        mModel.getInputValueInfos().clear();
         mModel.setPickStarted(true);
 
         Runnable getStrengthRunnable = new Runnable() {
@@ -274,6 +283,15 @@ public class MainPresenter extends BasePresenter<IMainView> {
         }
     }
 
+    public void setForceOverride(boolean override){
+        mOverride = override;
+    }
+
+    public boolean getForceOverride(){
+        return mOverride;
+    }
+
+
     /**
      * save the current values of the list and the description (display) to the DB
      * @param text file's name
@@ -285,7 +303,11 @@ public class MainPresenter extends BasePresenter<IMainView> {
         }else if ("".equals(text)){
             ToastUtils.showShort("当前文件名为空");
             return -2;
+        }else if (!getForceOverride() && mModel.isThisNameUsed(text)){
+            ToastUtils.showShort("此文件名已被使用");
+            return FILE_NAME_USED;
         }
+        setForceOverride(false); // reset the override mode to true for next ask of override behavior. wyy
         mModel.saveValuesToDB(text);
         mModel.saveDisplayToDB(text);
         ToastUtils.showShort("存储完成");
@@ -366,5 +388,7 @@ public class MainPresenter extends BasePresenter<IMainView> {
         if (mGetStrengthHandler != null){
             mGetStrengthHandler.stop();
         }
+        mView.morphBtnToNotStartedState();
+        mModel.setPickStarted(false);
     }
 }

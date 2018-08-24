@@ -121,6 +121,23 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </com.qmuiteam.qmui.widget.roundwidget.QMUIRoundLinearLayout>
+<!--there is some error that the background of the morphing btn is transparent so I put this change off and return to this problem some day -.- wyy-->
+            <!--Attention : the visibility is muted-->
+            <com.dd.morphingbutton.MorphingButton
+
+                android:visibility="gone"
+
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="150dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:textSize="18sp"
+                android:textColor="@color/qmui_config_color_white"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/main_btn_start_end_pick"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
 
         </RelativeLayout>
 

@@ -45,4 +45,5 @@ dependencies {
     implementation 'com.dinuscxj:recycleritemdecoration:1.0.0'
     implementation 'com.stephentuso:welcome:1.4.1'
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
+    implementation 'com.github.dmytrodanylyk:android-morphing-button:98a4986e56' // commit hash
 }

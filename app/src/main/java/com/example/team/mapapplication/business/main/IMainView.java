@@ -56,4 +56,8 @@ public interface IMainView extends IBaseView, IBaseViewModel{
     void performSaveBtnCalled();
 
     void showMessageDialog(String s, IBaseMethodInterface iBaseMethodInterface);
+
+    void morphBtnToStartedState();
+
+    void morphBtnToNotStartedState();
 }

@@ -46,8 +46,10 @@ import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.blankj.utilcode.util.SizeUtils;
 import com.blankj.utilcode.util.TimeUtils;
 import com.blankj.utilcode.util.ToastUtils;
+import com.dd.morphingbutton.MorphingButton;
 import com.example.team.mapapplication.R;
 import com.example.team.mapapplication.base.BaseActivity;
 import com.example.team.mapapplication.base.BaseModel;
@@ -270,6 +272,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
                 .addItems(namesCS, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        if (mModel.isPickStarted()){
+                            ToastUtils.showShort("已经开始记录");
+                            return;
+                        }
                         selectedWifiContainer[0] = namesCS[which];
                         if ("4G".equals(selectedWifiContainer[0])){
                             selectedWifiContainer[0] = "";
@@ -304,6 +310,34 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
                 dialog.dismiss();
             }
         }).create().show();
+    }
+
+    @Override
+    public void morphBtnToStartedState() {
+        mModel.setMorphBtnHeight(mStartEndBtn.getHeight());
+        mModel.setMorphBtnWidth(mStartEndBtn.getWidth());
+        MorphingButton.Params circle = MorphingButton.Params.create()
+                .duration(500)
+                .cornerRadius(SizeUtils.dp2px(56))
+                .width(SizeUtils.dp2px(56))
+                .height(SizeUtils.dp2px(56))
+                .icon(R.drawable.ic_done_mp);
+        mStartEndBtn.morph(circle);
+    }
+
+    @Override
+    public void morphBtnToNotStartedState() {
+        int height = mModel.getmMorphBtnHeight();
+        int width = mModel.getMorphBtnWidth();
+        MorphingButton.Params square = MorphingButton.Params.create()
+                .duration(500)
+                .cornerRadius(0)
+                .height(height)
+                .width(width)
+                .color(R.color.colorAccent)
+                .color(R.color.colorPrimary)
+                .text("点击开始");
+        mStartEndBtn.morph(square);
     }
 
     @Override
@@ -413,6 +447,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
     private LinearLayout mWifiViewsContainer;
     private TextView mItemCountView;
+
+    private MorphingButton mStartEndBtn;
     private Button mStartPickBtn;
     private Button mEndPickBtn;
     private ProgressBar mProgressBar;
@@ -587,6 +623,13 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
     private void initClickListener() {
 
+        mStartEndBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         mBaiduMap.setOnMapClickListener(new BaiduMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -639,6 +682,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
                         int state = mPresenter.saveValuesToDB(text);
                         if (state == 0){
                             dialog.dismiss();
+                        }else if (state == MainPresenter.FILE_NAME_USED){
+                            showOverrideAskBox(text);
                         }
                     }
                 }.getDialog();
@@ -698,7 +743,24 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
         });
     }
 
+    public void showOverrideAskBox(final String text) {
+        QMUIDialog.MessageDialogBuilder builder = new QMUIDialog.MessageDialogBuilder(getContext());
+        builder.setTitle("确定要覆盖本文件？").addAction("取消", new QMUIDialogAction.ActionListener() {
+            @Override
+            public void onClick(QMUIDialog dialog, int index) {
+                dialog.dismiss();
+            }
+        }).addAction("确认", new QMUIDialogAction.ActionListener() {
+            @Override
+            public void onClick(QMUIDialog dialog, int index) {
+                mPresenter.setForceOverride(true);
+                mPresenter.saveValuesToDB(text);
+            }
+        }).create().show();
+    }
+
     private void initialInit() {
+        mStartEndBtn = findViewById(R.id.main_btn_start_end_pick);
         mSaveBtn = findViewById(R.id.main_fab_save);
         mWifiViewsContainer = findViewById(R.id.main_ll_wifi_mode);
         mItemCountView = findViewById(R.id.main_rl_data_description_tv_count);
