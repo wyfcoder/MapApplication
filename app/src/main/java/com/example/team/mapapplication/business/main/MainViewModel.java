@@ -207,10 +207,21 @@ public class MainViewModel extends BaseModel {
 
         List<InputValueInfo> data = getInputValueInfos();
 
+        List<InputValueInfo> data_copy = new ArrayList<>();
+
+        for (InputValueInfo d : data){
+            InputValueInfo tmp = new InputValueInfo();
+            tmp.setValue(d.getValue());
+            tmp.setLatLng(d.getLatLng());
+            data_copy.add(d);
+        }
+
+
         if (isThisNameUsed(text)){
             LitePal.deleteAll(InputValueInfo.class, "fileName = ?", text);
         }
-        for (InputValueInfo d : data){
+        for (InputValueInfo d : data_copy){
+            d.assignBaseObjId(0);
             d.setFileName(text);
             // accidentally find that LitePal seems not able to deal with parcelable class...
             d.setLatitude(d.getLatLng().latitude);

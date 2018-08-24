@@ -684,6 +684,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
                             dialog.dismiss();
                         }else if (state == MainPresenter.FILE_NAME_USED){
                             showOverrideAskBox(text);
+                            dialog.dismiss();
                         }
                     }
                 }.getDialog();
@@ -755,6 +756,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
             public void onClick(QMUIDialog dialog, int index) {
                 mPresenter.setForceOverride(true);
                 mPresenter.saveValuesToDB(text);
+                dialog.dismiss();
             }
         }).create().show();
     }
