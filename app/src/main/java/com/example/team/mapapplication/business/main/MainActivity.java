@@ -896,10 +896,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        mMapView.onDestroy();
-
         mPresenter.unBindSignalServiceIfNeeded();
+
+        mMapView.onDestroy();
 
         // unbind location service if needed. wyy
         if (mModel.getModeStatus() != MainViewModel.DISPLAY_MODE){
@@ -908,6 +907,11 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
             }
             stopService(new Intent(this, LocationService.class));
         }
+
+        super.onDestroy();
+
+
+
     }
 
     @Override

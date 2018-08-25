@@ -271,14 +271,14 @@ public class MainPresenter extends BasePresenter<IMainView> {
 
 
     public void bindSignalServiceIfNeeded() {
-        if (mSaveDataService == null){
+        if (mSaveDataService == null && mConnection != null){
             mContext.bindService(new Intent(mContext, SaveDataService.class), mConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
 
     public void unBindSignalServiceIfNeeded() {
-        if (mSaveDataService != null){
+        if (mSaveDataService != null && mConnection != null){
             mContext.unbindService(mConnection);
         }
     }

@@ -207,6 +207,9 @@ public class MainViewModel extends BaseModel {
 
         List<InputValueInfo> data = getInputValueInfos();
 
+
+        // another copy of the original data would not solve the problem of the failure on saving data. wyy
+        // but on account of the stability I don't want to delete this right now until this problem is completely clear. wyy
         List<InputValueInfo> data_copy = new ArrayList<>();
 
         for (InputValueInfo d : data){
@@ -221,7 +224,12 @@ public class MainViewModel extends BaseModel {
             LitePal.deleteAll(InputValueInfo.class, "fileName = ?", text);
         }
         for (InputValueInfo d : data_copy){
-            d.assignBaseObjId(0);
+            d.assignBaseObjId(0);  // this line is the key I think. no matter how I copy the original data,
+                                   // once I do the assignment of any value of the object and add it into the new list,
+                                   // the baseObjIds of the original data will be written simultaneously into the new ones
+                                   // even though I have never done anything about the ids.
+                                   // thus by referring to the official doc I use this method to force the Id to be 0.
+                                   // and it works, lucky. wyy
             d.setFileName(text);
             // accidentally find that LitePal seems not able to deal with parcelable class...
             d.setLatitude(d.getLatLng().latitude);
