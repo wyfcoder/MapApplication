@@ -1,12 +1,11 @@
 package com.example.team.mapapplication.business.background_functions.location;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Binder;
-import android.os.IBinder;
+import android.util.Log;
+
+
 
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
@@ -19,16 +18,19 @@ import com.example.team.mapapplication.business.background_functions.latlng.Jing
 import com.example.team.mapapplication.business.background_functions.latlng.Math_ways;
 import com.example.team.mapapplication.engine.RepeatHandler;
 
-public class LocationService extends Service {
+public class LocationService extends Service
+{
 
     private IntereactionForLocation mLocationInterface;
+
     private RepeatHandler mRequestHandler;
 
     public void setLocationInterface(IntereactionForLocation i){
         mLocationInterface = i;
     }
 
-    public class ServiceBinder extends Binder{
+    public class ServiceBinder extends Binder
+    {
         public LocationService getService(){
             return LocationService.this;
         }
@@ -44,6 +46,12 @@ public class LocationService extends Service {
 
     private LocationClientOption option;
 
+   /* private int smoothTimes;
+    private double smoothDistance;
+    private double smoothLastX;
+    private double smoothLatitude;
+    private double smoothLongitude;*/
+
     private double latitude_value;
     private double longitude_value;
     public double latitude_last;
@@ -54,69 +62,75 @@ public class LocationService extends Service {
     private boolean isFirst;
     private double accurate;
 
-    private int re_times;
-    private int frequeence;
-    private ReLocationBroadcastReceive reLocationBroadcastReceive;
+
     private MyLocationListener myLocationListener = new MyLocationListener();
 
 
-    private class MyLocationListener extends BDAbstractLocationListener {
-        //更新出新的地理信息
+    private class MyLocationListener extends BDAbstractLocationListener{
+
         public void onReceiveLocation(BDLocation bdLocation)
         {
-            double latitude2 = bdLocation.getLatitude();
-            double longitude2 = bdLocation.getLongitude();
+
             Math_ways math_ways = new Math_ways();
-            lastX = sensorService.lastX;
-            SensorData sensorData = sensorService.get();
-
-            if (isFirst)
+           /* if(smoothTimes>0)
             {
-                latitude_value = latitude2;
-                longitude_value = longitude2;
-                longitude_last = longitude2;
-                latitude_last = latitude2;
-                distance = 0;
-                walkDistance = 0;
-                frequeence=0;
-                isFirst = false;
-            }
-            else
+                smoothTimes--;
+                JingWei old=new JingWei();
+                old.longitude_value=smoothLongitude;
+                old.latitude_value=smoothLatitude;
+                JingWei newO=math_ways.countJW(old,5,smoothLastX);
+               double d=math_ways.translateToDistance(old,newO);
+                if(d>smoothDistance)
                 {
-                JingWei old = new JingWei();
+                    smoothLastX+=50;
+                }
+                smoothDistance=d;
+                smoothLatitude = newO.latitude_value;
+                smoothLongitude= newO.longitude_value;
+                longitude_value = smoothLongitude;
+                latitude_value = smoothLatitude;
+            }*/
+                double latitude2 = bdLocation.getLatitude();
+                double longitude2 = bdLocation.getLongitude();
+                lastX = sensorService.lastX;
+                SensorData sensorData = sensorService.get();
 
-                old.longitude_value = longitude_value;
-                old.latitude_value = latitude_value;
-
-                walkDistance = math_ways.stepToDistance(sensorData.steps, getApplicationContext());
-
-                JingWei newO = math_ways.countJW(old, walkDistance, sensorData.lastX);
-
-                old.latitude_value = latitude2;
-
-                old.longitude_value = longitude2;
-
-                distance = math_ways.translateToDistance(old, newO);
-
-                if (re_times == 0)
+                if (isFirst)
                 {
+                    latitude_value = latitude2;
+                    longitude_value = longitude2;
+                    longitude_last = longitude2;
+                    latitude_last = latitude2;
+                    distance = 0;
+                    walkDistance = 0;
+                    isFirst = false;
+                }
+                else {
+                    JingWei old = new JingWei();
+
+                    old.longitude_value = longitude_value;
+
+                    old.latitude_value = latitude_value;
+
+                    walkDistance = math_ways.stepToDistance(sensorData.steps, getApplicationContext());
+
+                    JingWei newO = math_ways.countJW(old, walkDistance, sensorData.lastX);
+
+                    old.latitude_value = latitude2;
+
+                    old.longitude_value = longitude2;
+
+                    distance = math_ways.translateToDistance(old, newO);
+
                     if (latitude_last == latitude2 && longitude_last == longitude2)
+                    //返回的地理信息与上次相同时，选择由计步器返回的数据。wyf
                     {
-                        frequeence++;
-                        if(distance<35) {
-                            longitude_value = newO.longitude_value;
-                            latitude_value = newO.latitude_value;
-                        }
-                        else
-                        {
-                            longitude_value=longitude_last;
-                            latitude_value=latitude_last;
-                        }
+                        longitude_value = newO.longitude_value;
+                        latitude_value = newO.latitude_value;
                     }
-
                     else
-                    {
-                        if (distance <= 25||distance>200||frequeence<=5)
+                        {
+                        if (distance < 10)
                         {
                             longitude_value = newO.longitude_value;
                             latitude_value = newO.latitude_value;
@@ -126,35 +140,22 @@ public class LocationService extends Service {
                             longitude_value = longitude2;
                             latitude_value = latitude2;
                         }
-                        if (distance <= 300)
-                        {
-                            longitude_last = longitude2;
-                            latitude_last = latitude2;
-                        }
-                        frequeence=0;
+                        longitude_last = longitude2;
+                        latitude_last = latitude2;
                     }
                 }
-                else
-                {
-                    re_times--;
-                    latitude_value = newO.latitude_value;
-                    longitude_value = newO.longitude_value;
-                    longitude_last=longitude2;
-                    latitude_last=latitude2;
-                }
-                    sensorService.restart();
-                }
-            lastX = sensorData.lastX;
+
+            Log.e("精度："+accurate+"经度："+latitude_value+"纬度"+longitude_value+"角度"+lastX,"MEG");
+
+            sensorService.restart();
             accurate = bdLocation.getRadius();
-
-
 //            locationClient.stop();  // OK here is where all happens. I mute it and the notification stop flashing. wyy
 
-            if (mLocationInterface != null){
+            if (mLocationInterface != null)
+            {
                 mLocationInterface.passLocation(new LatLng(latitude_value, longitude_value), accurate, lastX);
             }
 
-//            sendBroadcast();  No need to communicate with the original "Main Activity". wyy
         }
     }
 
@@ -166,12 +167,15 @@ public class LocationService extends Service {
     @Deprecated
     private class DataThread implements Runnable {
         @Override
-        public void run() {
+        public void run()
+        {
             while (true) {
-                try {
+                try
+                {
                     Thread.sleep(3000);
                     locationClient.start();
-                } catch (InterruptedException e) {
+                } catch (InterruptedException e)
+                {
                     e.printStackTrace();
                 }
             }
@@ -180,21 +184,23 @@ public class LocationService extends Service {
 
     private DataThread dataThread;
 
-    public LocationService() {
+    public LocationService()
+    {
 
     }
 
 
-    public void onCreate() {
+    public void onCreate()
+    {
         super.onCreate();
         initOption();
         initClient();
 
 
         isFirst = true;
-        re_times = 0;
+
         sensorService = new SensorService(getApplicationContext());
-        initReceiver();
+
         dataThread = new DataThread();
         // here I deleted this line in order to multi-call the service to get latitude and longitude. wyy
     }
@@ -211,7 +217,8 @@ public class LocationService extends Service {
      * wyy
      */
 
-    private void initClient() {
+    private void initClient()
+    {
         locationClient = new LocationClient(getApplicationContext());
         locationClient.setLocOption(option);
         locationClient.registerLocationListener(myLocationListener);
@@ -234,7 +241,6 @@ public class LocationService extends Service {
         mRequestHandler.setDelay(1000);
         mRequestHandler.start();
 
-//        new Thread(dataThread).start();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -243,12 +249,14 @@ public class LocationService extends Service {
         super.onDestroy();
     }
 
-    public ServiceBinder onBind(Intent intent) {
+    public ServiceBinder onBind(Intent intent)
+    {
         // TODO: Return the communication channel to the service.
         return mBinder;
     }
 
-    private void initOption() {
+    private void initOption()
+    {
         option = new LocationClientOption();
         option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
         option.setCoorType("all");
@@ -263,36 +271,5 @@ public class LocationService extends Service {
         option.setOpenGps(true);
         locationClient = new LocationClient(getApplicationContext());
         locationClient.setLocOption(option);
-    }
-
-    private void initReceiver() {
-        reLocationBroadcastReceive = new ReLocationBroadcastReceive();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("com.reLocation");
-        registerReceiver(reLocationBroadcastReceive, intentFilter);
-    }
-
-    private void sendBroadcast()
-    {
-        Intent intent = new Intent("com.LocationInformation");
-        intent.putExtra("latitude", latitude_value);
-        intent.putExtra("longitude", longitude_value);
-        intent.putExtra("accurate", accurate);
-        intent.putExtra("distance", distance);
-        intent.putExtra("walkDistance", walkDistance);
-        intent.putExtra("lastX", lastX);
-        intent.putExtra("longitude_old", longitude_last);
-        intent.putExtra("latitude_old", latitude_last);
-        sendBroadcast(intent);
-    }
-
-    class ReLocationBroadcastReceive extends BroadcastReceiver
-    {
-        public void onReceive(Context context, Intent intent)
-        {
-            re_times = 10;
-            latitude_last=latitude_value = intent.getDoubleExtra("latitude", latitude_value);
-            longitude_last=longitude_value = intent.getDoubleExtra("longitude", longitude_value);
-        }
     }
 }

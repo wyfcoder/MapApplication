@@ -1,9 +1,11 @@
 package com.example.team.mapapplication.business.main;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -22,6 +24,7 @@ import com.example.team.mapapplication.business.acquireinfo.AcquireModel;
 import com.example.team.mapapplication.business.background_functions.signal.SaveDataService;
 import com.example.team.mapapplication.engine.RepeatHandler;
 import com.example.team.mapapplication.engine.LocateFinishHandler;
+import com.example.team.mapapplication.engine.ScreenShotHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -390,5 +393,20 @@ public class MainPresenter extends BasePresenter<IMainView> {
         }
         mView.morphBtnToNotStartedState();
         mModel.setPickStarted(false);
+    }
+
+    public void shotScreen() {
+        animateFloatingViews();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ScreenShotHelper shotHelper = new ScreenShotHelper().setDefaultListener();
+                shotHelper.shotScreen((Activity) mContext);  // have not detected type-cast safety yet... wyy
+                animateFloatingViews();
+                // but it should work I bet.
+            }
+        }, 1000);
+
+
     }
 }

@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 
 import java.util.ArrayList;
@@ -76,18 +77,69 @@ public class SensorService implements SensorEventListener
     private void dealSteps()
     {
         List<Integer> data=new ArrayList<>();
-        for(int i=0;i<values.size();i++)  data.add(values.get(i).intValue());
-        int t=0;
-        for(int i=1;i<data.size();i++)
+        List<Integer> data2=new ArrayList<>();
+        int size=values.size();
+        int aData;
+        int length;
+        steps=0;
+
+        for(int i=0;i<size;i++)  data.add(values.get(i).intValue());
+
+        boolean isUp;
+
+
+        if(data.get(0)>=data.get(1)) isUp=true;
+        else isUp=false;
+
+        length=1;
+        aData=data.get(1);
+
+        for(int k=2;k<size;k++)
         {
-            if(data.get(i-1)>data.get(i))
-                t++;
+            if(data.get(k)>aData)
+            {
+                if(!isUp)
+                {
+                    data2.add(length);
+                    isUp=true;
+                    length=1;
+                }
+                else
+                {
+                    length++;
+                }
+                aData=data.get(k);
+            }
+            else if(data.get(k)<aData)
+            {
+                if(isUp)
+                {
+                    data2.add(length);
+                    isUp=false;
+                    length=1;
+                }
+                else
+                {
+                    length++;
+                }
+                aData=data.get(k);
+            }
+            else
+            {
+                length++;
+            }
         }
-        
-        if(t<5) steps=0;
-        else if(5<t&&t<10) steps=0.5;
-        else if(t<20&&t>10) steps=1;
-        else if(t>20) steps=1.5;
+
+
+        //  person  can walk 0~5 steps each secon. wyf
+        double min=size*0.2;
+        size=data2.size();
+        for(int i=0;i<size-2;)
+        {
+            if((data2.get(i+1)+data2.get(i+2))>min) steps++;
+            i+=2;
+        }
+
     }
 
     private void initSensor()

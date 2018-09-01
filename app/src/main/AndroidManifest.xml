@@ -66,11 +66,16 @@
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="kZd76uh6x8jBirG85YZo8RwCEtHdIvsa" />
 
-        <activity android:name=".business.main.MainActivity"></activity>
-        <activity android:name=".business.retrieve.RetrieveActivity" />
+        <activity android:name=".business.main.MainActivity"
+            android:screenOrientation="portrait">
+
+        </activity>
+        <activity android:name=".business.retrieve.RetrieveActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".business.welcome.MyWelcomeActivity"
-            android:theme="@style/WelcomeScreenTheme">
+            android:theme="@style/WelcomeScreenTheme"
+            android:screenOrientation="portrait">
 
         </activity>
         <activity android:name=".engine.StartActivity"

@@ -812,6 +812,8 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     public boolean onCreateOptionsMenu(Menu menu) {
         if (mModel.getModeStatus() != MainViewModel.DISPLAY_MODE){
             getMenuInflater().inflate(R.menu.input_topbar_menu, menu);
+        }else {
+            getMenuInflater().inflate(R.menu.diplay_menu, menu);
         }
         return super.onCreateOptionsMenu(menu);
     }
@@ -819,6 +821,10 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
+            case R.id.menu_item_screen_shot:
+                mPresenter.shotScreen();
+                break;
+
             case R.id.menu_item_edit_mode:
                 if (mModel.getModeStatus() != MainViewModel.EDIT_MODE){
                     mPresenter.transferToEditMode();
