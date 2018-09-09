@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 
+import com.baidu.mapapi.map.BaiduMap;
 import com.blankj.utilcode.util.ToastUtils;
 
 import java.io.File;
@@ -37,6 +38,21 @@ public class ScreenShotHelper {
 
     private ScreenShotListener mListener;
 
+    public void shotScreen(BaiduMap map){
+        if (mListener != null){
+            mListener.beforeScreenShot();
+        }
+        map.snapshot(new BaiduMap.SnapshotReadyCallback() {
+            @Override
+            public void onSnapshotReady(Bitmap bitmap) {
+                if (mListener != null){
+                    mListener.afterScreenShot(bitmap);
+                }
+            }
+        });
+    }
+
+    @Deprecated
     public Bitmap shotScreen(Activity activity){
 
         if (mListener != null){
@@ -44,9 +60,10 @@ public class ScreenShotHelper {
         }
 
         View dView = activity.getWindow().getDecorView();
-        dView.setDrawingCacheEnabled(true);
-        dView.buildDrawingCache();
-        Bitmap bitmap = Bitmap.createBitmap(dView.getDrawingCache());
+//        dView.setDrawingCacheEnabled(true);
+//        dView.buildDrawingCache();
+//        Bitmap bitmap = dView.getDrawingCache();
+        Bitmap bitmap = getBitmapFromView(dView);
 
         if (mListener != null){
             mListener.afterScreenShot(bitmap);
@@ -54,6 +71,15 @@ public class ScreenShotHelper {
         return bitmap;
     }
 
+    public static Bitmap getBitmapFromView(View view) {
+        view.destroyDrawingCache();
+        view.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.EXACTLY));
+        view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+        view.setDrawingCacheEnabled(true);
+        Bitmap bitmap = view.getDrawingCache(true);
+        return bitmap;
+    }
 
 
     public void saveScreenShot(Bitmap bitmap) {
@@ -69,7 +95,7 @@ public class ScreenShotHelper {
                 os.flush();
                 os.close();
                 Log.d("a7888", "存储完成");
-                ToastUtils.showShort("存储完成");
+                ToastUtils.showLong("存储完成: " + filePath);
             } catch (Exception e) {
             }
         }

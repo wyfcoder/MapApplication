@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 
+import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.model.LatLng;
 import com.blankj.utilcode.constant.PermissionConstants;
 import com.blankj.utilcode.util.PermissionUtils;
@@ -187,7 +188,7 @@ public class MainPresenter extends BasePresenter<IMainView> {
     }
 
     public void animateFloatingViews() {
-        ToastUtils.showShort("MapView Clicked");
+//        ToastUtils.showShort("MapView Clicked");
         if (mModel.isToolbarHide()){
             showFloatingViews();
         }else {
@@ -395,13 +396,14 @@ public class MainPresenter extends BasePresenter<IMainView> {
         mModel.setPickStarted(false);
     }
 
-    public void shotScreen() {
+    public void shotScreen(final BaiduMap map) {
         animateFloatingViews();
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 ScreenShotHelper shotHelper = new ScreenShotHelper().setDefaultListener();
-                shotHelper.shotScreen((Activity) mContext);  // have not detected type-cast safety yet... wyy
+//                shotHelper.shotScreen((Activity) mContext);  // have not ensured type-cast safety yet... wyy
+                shotHelper.shotScreen(map);
                 animateFloatingViews();
                 // but it should work I bet.
             }

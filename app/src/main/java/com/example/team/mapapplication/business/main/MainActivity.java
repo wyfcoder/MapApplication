@@ -101,9 +101,9 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     @Override
     public void drawHeatMap(List<LatLng> dataList) {
         //设置渐变颜色值
-        int[] DEFAULT_GRADIENT_COLORS = {Color.rgb(102, 225,  0), Color.rgb(255, 0, 0) };
+        int[] DEFAULT_GRADIENT_COLORS = {Color.rgb(0, 225,  50), Color.rgb(255, 0, 0) };
         //设置渐变颜色起始值
-        float[] DEFAULT_GRADIENT_START_POINTS = { 0.2f, 1f };
+        float[] DEFAULT_GRADIENT_START_POINTS = { 0.1f, 1f };
         //构造颜色渐变对象
         Gradient gradient = new Gradient(DEFAULT_GRADIENT_COLORS, DEFAULT_GRADIENT_START_POINTS);
 
@@ -822,7 +822,7 @@ public class MainActivity extends BaseActivity<MainPresenter> implements IMainVi
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.menu_item_screen_shot:
-                mPresenter.shotScreen();
+                mPresenter.shotScreen(mMapView.getMap());
                 break;
 
             case R.id.menu_item_edit_mode:
